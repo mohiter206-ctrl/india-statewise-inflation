@@ -1,0 +1,357 @@
+State,Sector,Date,Original_Value,Filled_Value,Method,Status
+Andhra Pradesh,Rural,2019-04-01,,142.15,Linear interpolation in CPI index level; internal gap of 1 month(s),Imputed
+Andhra Pradesh,Rural,2021-03-01,,164.85,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Andhra Pradesh,Rural,2021-04-01,,164.6,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Andhra Pradesh,Rural,2021-05-01,,164.35,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Assam,Rural,2019-04-01,,144.45,Linear interpolation in CPI index level; internal gap of 1 month(s),Imputed
+Assam,Rural,2021-03-01,,164.3,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Assam,Rural,2021-04-01,,164.4,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Assam,Rural,2021-05-01,,164.5,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Chattisgarh,Rural,2019-04-01,,140.8,Linear interpolation in CPI index level; internal gap of 1 month(s),Imputed
+Chattisgarh,Rural,2021-03-01,,158.95,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Chattisgarh,Rural,2021-04-01,,159.1,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Chattisgarh,Rural,2021-05-01,,159.25,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Goa,Rural,2019-04-01,,145.35,Linear interpolation in CPI index level; internal gap of 1 month(s),Imputed
+Goa,Rural,2021-03-01,,161.525,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Goa,Rural,2021-04-01,,163.35,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Goa,Rural,2021-05-01,,165.175,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Gujarat,Rural,2019-04-01,,138.7,Linear interpolation in CPI index level; internal gap of 1 month(s),Imputed
+Gujarat,Rural,2021-03-01,,152.625,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Gujarat,Rural,2021-04-01,,154.55,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Gujarat,Rural,2021-05-01,,156.475,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Haryana,Rural,2019-04-01,,136.05,Linear interpolation in CPI index level; internal gap of 1 month(s),Imputed
+Haryana,Rural,2021-03-01,,153.975,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Haryana,Rural,2021-04-01,,154.45,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Haryana,Rural,2021-05-01,,154.925,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Himachal Pradesh,Rural,2019-04-01,,137.4,Linear interpolation in CPI index level; internal gap of 1 month(s),Imputed
+Himachal Pradesh,Rural,2019-11-01,,145.15,Linear interpolation in CPI index level; internal gap of 1 month(s),Imputed
+Himachal Pradesh,Rural,2020-07-01,,162.6,Linear interpolation in CPI index level; internal gap of 1 month(s),Imputed
+Himachal Pradesh,Rural,2020-09-01,,157.25,Linear interpolation in CPI index level; internal gap of 1 month(s),Imputed
+Himachal Pradesh,Rural,2021-03-01,,157.425,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Himachal Pradesh,Rural,2021-04-01,,156.35,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Himachal Pradesh,Rural,2021-05-01,,155.275,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Jharkhand,Rural,2019-04-01,,143.5,Linear interpolation in CPI index level; internal gap of 1 month(s),Imputed
+Jharkhand,Rural,2021-03-01,,158.75,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Jharkhand,Rural,2021-04-01,,158.0,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Jharkhand,Rural,2021-05-01,,157.25,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Karnataka,Rural,2019-04-01,,147.2,Linear interpolation in CPI index level; internal gap of 1 month(s),Imputed
+Karnataka,Rural,2021-03-01,,167.925,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Karnataka,Rural,2021-04-01,,167.45,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Karnataka,Rural,2021-05-01,,166.975,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Kerala,Rural,2019-04-01,,151.65,Linear interpolation in CPI index level; internal gap of 1 month(s),Imputed
+Kerala,Rural,2021-03-01,,168.775,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Kerala,Rural,2021-04-01,,169.55,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Kerala,Rural,2021-05-01,,170.325,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Madhya Pradesh,Rural,2019-04-01,,138.0,Linear interpolation in CPI index level; internal gap of 1 month(s),Imputed
+Madhya Pradesh,Rural,2021-03-01,,164.025,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Madhya Pradesh,Rural,2021-04-01,,163.05,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Madhya Pradesh,Rural,2021-05-01,,162.075,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Maharashtra,Rural,2019-04-01,,140.7,Linear interpolation in CPI index level; internal gap of 1 month(s),Imputed
+Maharashtra,Rural,2021-03-01,,155.7,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Maharashtra,Rural,2021-04-01,,158.4,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Maharashtra,Rural,2021-05-01,,161.1,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Manipur,Rural,2019-04-01,,166.8,Linear interpolation in CPI index level; internal gap of 1 month(s),Imputed
+Manipur,Rural,2021-03-01,,174.625,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Manipur,Rural,2021-04-01,,178.95,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Manipur,Rural,2021-05-01,,183.275,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Meghalaya,Rural,2019-04-01,,138.0,Linear interpolation in CPI index level; internal gap of 1 month(s),Imputed
+Meghalaya,Rural,2021-03-01,,158.375,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Meghalaya,Rural,2021-04-01,,158.25,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Meghalaya,Rural,2021-05-01,,158.125,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Mizoram,Rural,2019-04-01,,137.9,Linear interpolation in CPI index level; internal gap of 1 month(s),Imputed
+Mizoram,Rural,2021-03-01,,159.375,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Mizoram,Rural,2021-04-01,,160.85,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Mizoram,Rural,2021-05-01,,162.325,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Orissa,Rural,2019-04-01,,141.8,Linear interpolation in CPI index level; internal gap of 1 month(s),Imputed
+Orissa,Rural,2021-03-01,,157.65,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Orissa,Rural,2021-04-01,,159.3,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Orissa,Rural,2021-05-01,,160.95,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Punjab,Rural,2019-04-01,,139.8,Linear interpolation in CPI index level; internal gap of 1 month(s),Imputed
+Punjab,Rural,2021-03-01,,153.675,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Punjab,Rural,2021-04-01,,155.45,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Punjab,Rural,2021-05-01,,157.225,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Tamil Nadu,Rural,2019-04-01,,146.35,Linear interpolation in CPI index level; internal gap of 1 month(s),Imputed
+Tamil Nadu,Rural,2021-03-01,,168.225,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Tamil Nadu,Rural,2021-04-01,,168.45,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Tamil Nadu,Rural,2021-05-01,,168.675,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Tripura,Rural,2019-04-01,,151.0,Linear interpolation in CPI index level; internal gap of 1 month(s),Imputed
+Tripura,Rural,2020-03-01,,170.2667,Linear interpolation in CPI index level; internal gap of 2 month(s),Imputed
+Tripura,Rural,2020-04-01,,159.9333,Linear interpolation in CPI index level; internal gap of 2 month(s),Imputed
+Tripura,Rural,2021-03-01,,168.35,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Tripura,Rural,2021-04-01,,171.5,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Tripura,Rural,2021-05-01,,174.65,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Uttar Pradesh,Rural,2019-04-01,,137.4,Linear interpolation in CPI index level; internal gap of 1 month(s),Imputed
+Uttar Pradesh,Rural,2021-03-01,,159.35,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Uttar Pradesh,Rural,2021-04-01,,159.1,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Uttar Pradesh,Rural,2021-05-01,,158.85,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+West Bengal,Rural,2019-04-01,,143.0,Linear interpolation in CPI index level; internal gap of 1 month(s),Imputed
+West Bengal,Rural,2020-03-01,,156.8333,Linear interpolation in CPI index level; internal gap of 2 month(s),Imputed
+West Bengal,Rural,2020-04-01,,151.6667,Linear interpolation in CPI index level; internal gap of 2 month(s),Imputed
+West Bengal,Rural,2021-03-01,,165.475,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+West Bengal,Rural,2021-04-01,,165.65,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+West Bengal,Rural,2021-05-01,,165.825,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Andaman and Nicobar,Rural,2019-04-01,,154.4,Linear interpolation in CPI index level; internal gap of 1 month(s),Imputed
+Andaman and Nicobar,Rural,2021-03-01,,165.175,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Andaman and Nicobar,Rural,2021-04-01,,168.85,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Andaman and Nicobar,Rural,2021-05-01,,172.525,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Chandigarh,Rural,2019-04-01,,138.35,Linear interpolation in CPI index level; internal gap of 1 month(s),Imputed
+Chandigarh,Rural,2021-03-01,,152.675,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Chandigarh,Rural,2021-04-01,,154.15,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Chandigarh,Rural,2021-05-01,,155.625,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Dadra and Nagar Haveli,Rural,2019-04-01,,138.3,Linear interpolation in CPI index level; internal gap of 1 month(s),Imputed
+Dadra and Nagar Haveli,Rural,2021-03-01,,153.65,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Dadra and Nagar Haveli,Rural,2021-04-01,,152.6,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Dadra and Nagar Haveli,Rural,2021-05-01,,151.55,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Daman and Diu,Rural,2019-04-01,,143.5,Linear interpolation in CPI index level; internal gap of 1 month(s),Imputed
+Daman and Diu,Rural,2021-03-01,,164.4,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Daman and Diu,Rural,2021-04-01,,165.9,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Daman and Diu,Rural,2021-05-01,,167.4,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Jammu and Kashmir,Rural,2019-04-01,,150.0,Linear interpolation in CPI index level; internal gap of 1 month(s),Imputed
+Jammu and Kashmir,Rural,2021-03-01,,168.625,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Jammu and Kashmir,Rural,2021-04-01,,169.05,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Jammu and Kashmir,Rural,2021-05-01,,169.475,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Lakshadweep,Rural,2019-04-01,,140.9,Linear interpolation in CPI index level; internal gap of 1 month(s),Imputed
+Lakshadweep,Rural,2021-03-01,,165.425,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Lakshadweep,Rural,2021-04-01,,168.55,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Lakshadweep,Rural,2021-05-01,,171.675,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Puducherry,Rural,2019-04-01,,143.65,Linear interpolation in CPI index level; internal gap of 1 month(s),Imputed
+Puducherry,Rural,2021-03-01,,164.725,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Puducherry,Rural,2021-04-01,,164.65,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Puducherry,Rural,2021-05-01,,164.575,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Andhra Pradesh,Urban,2019-04-01,,141.0,Linear interpolation in CPI index level; internal gap of 1 month(s),Imputed
+Andhra Pradesh,Urban,2021-03-01,,164.15,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Andhra Pradesh,Urban,2021-04-01,,164.5,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Andhra Pradesh,Urban,2021-05-01,,164.85,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Andhra Pradesh,Urban,2023-04-01,,184.6,Linear interpolation in CPI index level; internal gap of 1 month(s),Imputed
+Assam,Urban,2019-04-01,,142.85,Linear interpolation in CPI index level; internal gap of 1 month(s),Imputed
+Assam,Urban,2021-03-01,,163.15,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Assam,Urban,2021-04-01,,163.5,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Assam,Urban,2021-05-01,,163.85,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Chattisgarh,Urban,2019-04-01,,143.45,Linear interpolation in CPI index level; internal gap of 1 month(s),Imputed
+Chattisgarh,Urban,2021-03-01,,158.625,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Chattisgarh,Urban,2021-04-01,,158.55,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Chattisgarh,Urban,2021-05-01,,158.475,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Goa,Urban,2019-04-01,,149.75,Linear interpolation in CPI index level; internal gap of 1 month(s),Imputed
+Goa,Urban,2021-03-01,,161.375,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Goa,Urban,2021-04-01,,161.25,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Goa,Urban,2021-05-01,,161.125,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Gujarat,Urban,2019-04-01,,140.9,Linear interpolation in CPI index level; internal gap of 1 month(s),Imputed
+Gujarat,Urban,2021-03-01,,153.2,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Gujarat,Urban,2021-04-01,,152.7,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Gujarat,Urban,2021-05-01,,152.2,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Haryana,Urban,2019-04-01,,137.2,Linear interpolation in CPI index level; internal gap of 1 month(s),Imputed
+Haryana,Urban,2021-03-01,,154.325,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Haryana,Urban,2021-04-01,,154.15,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Haryana,Urban,2021-05-01,,153.975,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Himachal Pradesh,Urban,2019-04-01,,137.2,Linear interpolation in CPI index level; internal gap of 1 month(s),Imputed
+Himachal Pradesh,Urban,2019-12-01,,152.55,Linear interpolation in CPI index level; internal gap of 1 month(s),Imputed
+Himachal Pradesh,Urban,2021-03-01,,155.6,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Himachal Pradesh,Urban,2021-04-01,,156.8,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Himachal Pradesh,Urban,2021-05-01,,158.0,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Jharkhand,Urban,2019-04-01,,145.15,Linear interpolation in CPI index level; internal gap of 1 month(s),Imputed
+Jharkhand,Urban,2021-03-01,,158.675,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Jharkhand,Urban,2021-04-01,,160.15,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Jharkhand,Urban,2021-05-01,,161.625,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Karnataka,Urban,2019-04-01,,143.65,Linear interpolation in CPI index level; internal gap of 1 month(s),Imputed
+Karnataka,Urban,2021-03-01,,167.35,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Karnataka,Urban,2021-04-01,,167.8,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Karnataka,Urban,2021-05-01,,168.25,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Kerala,Urban,2019-04-01,,147.2,Linear interpolation in CPI index level; internal gap of 1 month(s),Imputed
+Kerala,Urban,2021-03-01,,169.7,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Kerala,Urban,2021-04-01,,169.1,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Kerala,Urban,2021-05-01,,168.5,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Madhya Pradesh,Urban,2019-04-01,,135.6,Linear interpolation in CPI index level; internal gap of 1 month(s),Imputed
+Madhya Pradesh,Urban,2021-03-01,,162.3,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Madhya Pradesh,Urban,2021-04-01,,162.7,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Madhya Pradesh,Urban,2021-05-01,,163.1,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Maharashtra,Urban,2019-04-01,,142.2,Linear interpolation in CPI index level; internal gap of 1 month(s),Imputed
+Maharashtra,Urban,2021-03-01,,155.875,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Maharashtra,Urban,2021-04-01,,155.65,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Maharashtra,Urban,2021-05-01,,155.425,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Manipur,Urban,2019-04-01,,166.2,Linear interpolation in CPI index level; internal gap of 1 month(s),Imputed
+Manipur,Urban,2021-03-01,,180.375,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Manipur,Urban,2021-04-01,,177.35,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Manipur,Urban,2021-05-01,,174.325,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Meghalaya,Urban,2019-04-01,,140.05,Linear interpolation in CPI index level; internal gap of 1 month(s),Imputed
+Meghalaya,Urban,2021-03-01,,158.55,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Meghalaya,Urban,2021-04-01,,158.5,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Meghalaya,Urban,2021-05-01,,158.45,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Mizoram,Urban,2019-04-01,,138.8,Linear interpolation in CPI index level; internal gap of 1 month(s),Imputed
+Mizoram,Urban,2021-03-01,,159.625,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Mizoram,Urban,2021-04-01,,159.25,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Mizoram,Urban,2021-05-01,,158.875,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Orissa,Urban,2019-04-01,,142.95,Linear interpolation in CPI index level; internal gap of 1 month(s),Imputed
+Orissa,Urban,2021-03-01,,159.625,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Orissa,Urban,2021-04-01,,158.55,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Orissa,Urban,2021-05-01,,157.475,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Punjab,Urban,2019-04-01,,141.05,Linear interpolation in CPI index level; internal gap of 1 month(s),Imputed
+Punjab,Urban,2021-03-01,,154.8,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Punjab,Urban,2021-04-01,,153.7,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Punjab,Urban,2021-05-01,,152.6,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Tamil Nadu,Urban,2019-04-01,,143.8,Linear interpolation in CPI index level; internal gap of 1 month(s),Imputed
+Tamil Nadu,Urban,2021-03-01,,168.225,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Tamil Nadu,Urban,2021-04-01,,168.65,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Tamil Nadu,Urban,2021-05-01,,169.075,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Tripura,Urban,2019-04-01,,150.05,Linear interpolation in CPI index level; internal gap of 1 month(s),Imputed
+Tripura,Urban,2019-12-01,,173.1,Linear interpolation in CPI index level; internal gap of 1 month(s),Imputed
+Tripura,Urban,2020-03-01,,160.65,Linear interpolation in CPI index level; internal gap of 1 month(s),Imputed
+Tripura,Urban,2021-03-01,,172.45,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Tripura,Urban,2021-04-01,,170.3,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Tripura,Urban,2021-05-01,,168.15,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Uttar Pradesh,Urban,2019-04-01,,135.55,Linear interpolation in CPI index level; internal gap of 1 month(s),Imputed
+Uttar Pradesh,Urban,2021-03-01,,158.725,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Uttar Pradesh,Urban,2021-04-01,,159.15,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Uttar Pradesh,Urban,2021-05-01,,159.575,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+West Bengal,Urban,2019-04-01,,144.1,Linear interpolation in CPI index level; internal gap of 1 month(s),Imputed
+West Bengal,Urban,2019-12-01,,159.1,Linear interpolation in CPI index level; internal gap of 1 month(s),Imputed
+West Bengal,Urban,2020-03-01,,151.55,Linear interpolation in CPI index level; internal gap of 1 month(s),Imputed
+West Bengal,Urban,2021-03-01,,164.85,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+West Bengal,Urban,2021-04-01,,165.3,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+West Bengal,Urban,2021-05-01,,165.75,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Andaman and Nicobar,Urban,2019-04-01,,152.75,Linear interpolation in CPI index level; internal gap of 1 month(s),Imputed
+Andaman and Nicobar,Urban,2021-03-01,,165.925,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Andaman and Nicobar,Urban,2021-04-01,,164.85,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Andaman and Nicobar,Urban,2021-05-01,,163.775,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Chandigarh,Urban,2019-04-01,,141.5,Linear interpolation in CPI index level; internal gap of 1 month(s),Imputed
+Chandigarh,Urban,2021-03-01,,151.5,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Chandigarh,Urban,2021-04-01,,151.5,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Chandigarh,Urban,2021-05-01,,151.5,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Dadra and Nagar Haveli,Urban,2019-04-01,,138.55,Linear interpolation in CPI index level; internal gap of 1 month(s),Imputed
+Dadra and Nagar Haveli,Urban,2021-03-01,,153.0,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Dadra and Nagar Haveli,Urban,2021-04-01,,153.9,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Dadra and Nagar Haveli,Urban,2021-05-01,,154.8,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Daman and Diu,Urban,2019-04-01,,152.15,Linear interpolation in CPI index level; internal gap of 1 month(s),Imputed
+Daman and Diu,Urban,2021-03-01,,164.75,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Daman and Diu,Urban,2021-04-01,,164.1,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Daman and Diu,Urban,2021-05-01,,163.45,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Jammu and Kashmir,Urban,2019-04-01,,150.1,Linear interpolation in CPI index level; internal gap of 1 month(s),Imputed
+Jammu and Kashmir,Urban,2021-03-01,,169.0,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Jammu and Kashmir,Urban,2021-04-01,,168.8,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Jammu and Kashmir,Urban,2021-05-01,,168.6,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Lakshadweep,Urban,2019-04-01,,140.75,Linear interpolation in CPI index level; internal gap of 1 month(s),Imputed
+Lakshadweep,Urban,2021-03-01,,165.3,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Lakshadweep,Urban,2021-04-01,,164.3,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Lakshadweep,Urban,2021-05-01,,163.3,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Puducherry,Urban,2019-04-01,,142.95,Linear interpolation in CPI index level; internal gap of 1 month(s),Imputed
+Puducherry,Urban,2021-03-01,,165.725,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Puducherry,Urban,2021-04-01,,166.15,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Puducherry,Urban,2021-05-01,,166.575,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Andhra Pradesh,Rural+Urban,2019-04-01,,143.15,Linear interpolation in CPI index level; internal gap of 1 month(s),Imputed
+Andhra Pradesh,Rural+Urban,2021-03-01,,163.45,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Andhra Pradesh,Rural+Urban,2021-04-01,,163.8,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Andhra Pradesh,Rural+Urban,2021-05-01,,164.15,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Assam,Rural+Urban,2019-04-01,,145.55,Linear interpolation in CPI index level; internal gap of 1 month(s),Imputed
+Assam,Rural+Urban,2021-03-01,,162.925,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Assam,Rural+Urban,2021-04-01,,163.45,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Assam,Rural+Urban,2021-05-01,,163.975,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Chattisgarh,Rural+Urban,2019-04-01,,141.95,Linear interpolation in CPI index level; internal gap of 1 month(s),Imputed
+Chattisgarh,Rural+Urban,2021-03-01,,158.775,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Chattisgarh,Rural+Urban,2021-04-01,,158.85,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Chattisgarh,Rural+Urban,2021-05-01,,158.925,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Goa,Rural+Urban,2019-04-01,,142.45,Linear interpolation in CPI index level; internal gap of 1 month(s),Imputed
+Goa,Rural+Urban,2021-03-01,,164.125,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Goa,Rural+Urban,2021-04-01,,163.85,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Goa,Rural+Urban,2021-05-01,,163.575,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Gujarat,Rural+Urban,2019-04-01,,138.5,Linear interpolation in CPI index level; internal gap of 1 month(s),Imputed
+Gujarat,Rural+Urban,2021-03-01,,156.775,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Gujarat,Rural+Urban,2021-04-01,,156.05,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Gujarat,Rural+Urban,2021-05-01,,155.325,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Haryana,Rural+Urban,2019-04-01,,138.35,Linear interpolation in CPI index level; internal gap of 1 month(s),Imputed
+Haryana,Rural+Urban,2021-03-01,,155.15,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Haryana,Rural+Urban,2021-04-01,,155.0,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Haryana,Rural+Urban,2021-05-01,,154.85,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Himachal Pradesh,Rural+Urban,2019-04-01,,139.65,Linear interpolation in CPI index level; internal gap of 1 month(s),Imputed
+Himachal Pradesh,Rural+Urban,2019-12-01,,152.95,Linear interpolation in CPI index level; internal gap of 1 month(s),Imputed
+Himachal Pradesh,Rural+Urban,2020-02-01,,159.5,Linear interpolation in CPI index level; internal gap of 1 month(s),Imputed
+Himachal Pradesh,Rural+Urban,2020-09-01,,159.1,Linear interpolation in CPI index level; internal gap of 1 month(s),Imputed
+Himachal Pradesh,Rural+Urban,2021-03-01,,153.9,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Himachal Pradesh,Rural+Urban,2021-04-01,,154.3,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Himachal Pradesh,Rural+Urban,2021-05-01,,154.7,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Jharkhand,Rural+Urban,2019-04-01,,144.15,Linear interpolation in CPI index level; internal gap of 1 month(s),Imputed
+Jharkhand,Rural+Urban,2021-03-01,,156.525,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Jharkhand,Rural+Urban,2021-04-01,,157.35,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Jharkhand,Rural+Urban,2021-05-01,,158.175,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Karnataka,Rural+Urban,2019-04-01,,149.1,Linear interpolation in CPI index level; internal gap of 1 month(s),Imputed
+Karnataka,Rural+Urban,2021-03-01,,165.825,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Karnataka,Rural+Urban,2021-04-01,,166.45,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Karnataka,Rural+Urban,2021-05-01,,167.075,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Kerala,Rural+Urban,2019-04-01,,152.1,Linear interpolation in CPI index level; internal gap of 1 month(s),Imputed
+Kerala,Rural+Urban,2021-03-01,,171.125,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Kerala,Rural+Urban,2021-04-01,,170.75,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Kerala,Rural+Urban,2021-05-01,,170.375,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Madhya Pradesh,Rural+Urban,2019-04-01,,140.8,Linear interpolation in CPI index level; internal gap of 1 month(s),Imputed
+Madhya Pradesh,Rural+Urban,2021-03-01,,160.375,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Madhya Pradesh,Rural+Urban,2021-04-01,,160.95,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Madhya Pradesh,Rural+Urban,2021-05-01,,161.525,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Maharashtra,Rural+Urban,2019-04-01,,140.0,Linear interpolation in CPI index level; internal gap of 1 month(s),Imputed
+Maharashtra,Rural+Urban,2021-03-01,,161.325,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Maharashtra,Rural+Urban,2021-04-01,,160.25,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Maharashtra,Rural+Urban,2021-05-01,,159.175,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Manipur,Rural+Urban,2019-04-01,,165.4,Linear interpolation in CPI index level; internal gap of 1 month(s),Imputed
+Manipur,Rural+Urban,2021-03-01,,187.65,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Manipur,Rural+Urban,2021-04-01,,185.9,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Manipur,Rural+Urban,2021-05-01,,184.15,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Meghalaya,Rural+Urban,2019-04-01,,138.7,Linear interpolation in CPI index level; internal gap of 1 month(s),Imputed
+Meghalaya,Rural+Urban,2021-03-01,,158.55,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Meghalaya,Rural+Urban,2021-04-01,,158.4,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Meghalaya,Rural+Urban,2021-05-01,,158.25,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Mizoram,Rural+Urban,2019-04-01,,136.7,Linear interpolation in CPI index level; internal gap of 1 month(s),Imputed
+Mizoram,Rural+Urban,2021-03-01,,162.7,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Mizoram,Rural+Urban,2021-04-01,,162.0,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Mizoram,Rural+Urban,2021-05-01,,161.3,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Orissa,Rural+Urban,2019-04-01,,143.75,Linear interpolation in CPI index level; internal gap of 1 month(s),Imputed
+Orissa,Rural+Urban,2021-03-01,,162.1,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Orissa,Rural+Urban,2021-04-01,,161.7,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Orissa,Rural+Urban,2021-05-01,,161.3,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Punjab,Rural+Urban,2019-04-01,,139.6,Linear interpolation in CPI index level; internal gap of 1 month(s),Imputed
+Punjab,Rural+Urban,2021-03-01,,158.3,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Punjab,Rural+Urban,2021-04-01,,157.4,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Punjab,Rural+Urban,2021-05-01,,156.5,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Tamil Nadu,Rural+Urban,2019-04-01,,147.45,Linear interpolation in CPI index level; internal gap of 1 month(s),Imputed
+Tamil Nadu,Rural+Urban,2021-03-01,,167.875,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Tamil Nadu,Rural+Urban,2021-04-01,,168.35,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Tamil Nadu,Rural+Urban,2021-05-01,,168.825,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Tripura,Rural+Urban,2019-04-01,,153.25,Linear interpolation in CPI index level; internal gap of 1 month(s),Imputed
+Tripura,Rural+Urban,2019-12-01,,170.05,Linear interpolation in CPI index level; internal gap of 1 month(s),Imputed
+Tripura,Rural+Urban,2020-03-01,,163.35,Linear interpolation in CPI index level; internal gap of 1 month(s),Imputed
+Tripura,Rural+Urban,2021-03-01,,177.125,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Tripura,Rural+Urban,2021-04-01,,176.35,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Tripura,Rural+Urban,2021-05-01,,175.575,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Uttar Pradesh,Rural+Urban,2019-04-01,,138.95,Linear interpolation in CPI index level; internal gap of 1 month(s),Imputed
+Uttar Pradesh,Rural+Urban,2021-03-01,,157.9,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Uttar Pradesh,Rural+Urban,2021-04-01,,158.3,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Uttar Pradesh,Rural+Urban,2021-05-01,,158.7,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+West Bengal,Rural+Urban,2019-04-01,,143.7,Linear interpolation in CPI index level; internal gap of 1 month(s),Imputed
+West Bengal,Rural+Urban,2019-12-01,,152.15,Linear interpolation in CPI index level; internal gap of 1 month(s),Imputed
+West Bengal,Rural+Urban,2020-03-01,,153.25,Linear interpolation in CPI index level; internal gap of 1 month(s),Imputed
+West Bengal,Rural+Urban,2021-03-01,,164.225,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+West Bengal,Rural+Urban,2021-04-01,,164.85,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+West Bengal,Rural+Urban,2021-05-01,,165.475,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Andaman and Nicobar,Rural+Urban,2019-04-01,,150.2,Linear interpolation in CPI index level; internal gap of 1 month(s),Imputed
+Andaman and Nicobar,Rural+Urban,2021-03-01,,171.775,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Andaman and Nicobar,Rural+Urban,2021-04-01,,170.95,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Andaman and Nicobar,Rural+Urban,2021-05-01,,170.125,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Chandigarh,Rural+Urban,2019-04-01,,138.95,Linear interpolation in CPI index level; internal gap of 1 month(s),Imputed
+Chandigarh,Rural+Urban,2021-03-01,,154.875,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Chandigarh,Rural+Urban,2021-04-01,,153.85,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Chandigarh,Rural+Urban,2021-05-01,,152.825,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Dadra and Nagar Haveli,Rural+Urban,2019-04-01,,137.6,Linear interpolation in CPI index level; internal gap of 1 month(s),Imputed
+Dadra and Nagar Haveli,Rural+Urban,2021-03-01,,148.75,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Dadra and Nagar Haveli,Rural+Urban,2021-04-01,,150.5,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Dadra and Nagar Haveli,Rural+Urban,2021-05-01,,152.25,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Daman and Diu,Rural+Urban,2019-04-01,,143.75,Linear interpolation in CPI index level; internal gap of 1 month(s),Imputed
+Daman and Diu,Rural+Urban,2021-03-01,,166.975,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Daman and Diu,Rural+Urban,2021-04-01,,166.75,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Daman and Diu,Rural+Urban,2021-05-01,,166.525,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Jammu and Kashmir,Rural+Urban,2019-04-01,,150.25,Linear interpolation in CPI index level; internal gap of 1 month(s),Imputed
+Jammu and Kashmir,Rural+Urban,2021-03-01,,169.625,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Jammu and Kashmir,Rural+Urban,2021-04-01,,169.55,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Jammu and Kashmir,Rural+Urban,2021-05-01,,169.475,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Lakshadweep,Rural+Urban,2019-04-01,,142.35,Linear interpolation in CPI index level; internal gap of 1 month(s),Imputed
+Lakshadweep,Rural+Urban,2021-03-01,,169.9,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Lakshadweep,Rural+Urban,2021-04-01,,169.4,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Lakshadweep,Rural+Urban,2021-05-01,,168.9,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Puducherry,Rural+Urban,2019-04-01,,146.25,Linear interpolation in CPI index level; internal gap of 1 month(s),Imputed
+Puducherry,Rural+Urban,2021-03-01,,166.55,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Puducherry,Rural+Urban,2021-04-01,,166.5,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
+Puducherry,Rural+Urban,2021-05-01,,166.45,Linear interpolation in CPI index level; internal gap of 3 month(s),Imputed
