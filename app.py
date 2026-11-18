@@ -410,7 +410,6 @@ def multi_horizon_backtest(y, models, horizon=12, origins=4, min_train=60):
     return pd.DataFrame(rows),pd.DataFrame(failures)
 
 with tabs[4]:
-    st.subheader("Automatic Evaluate and Forecast")
     st.caption("Automatically evaluates candidate models on the selected State/UT and sector, selects the lowest-RMSE model on common validation origins, and generates the future forecast.")
     st.caption("Research evaluation note: the bundled independent fixed-origin holdout covers June 2022–May 2023, trained only through May 2022. It is a separate benchmark result; changing uploaded data or model settings does not automatically rerun that archived experiment.")
     st.write("The app now restores all 12 candidate methods from the earlier research versions so they can be compared against the focused seven-model set under the same rolling-origin evaluation design.")
@@ -457,6 +456,7 @@ with tabs[4]:
             st.download_button("Download multi-step failure log",mh_fail_saved.to_csv(index=False).encode(),"Repeated_Origin_Failures.csv","text/csv",key="persist_mh_failures")
         st.info("Origins are overlapping expanding-window forecasts. Prediction rows are not independent; report the number of origins separately and avoid treating every horizon row as an independent sample.")
     st.divider()
+    st.subheader("Automatic Evaluate and Forecast")
     horizon=st.slider("Forecast horizon (months)",3,24,12)
     origins=st.slider("Rolling-origin evaluation months",6,24,18)
     min_train=st.slider("Minimum training history (months)",24,60,36,step=12)
