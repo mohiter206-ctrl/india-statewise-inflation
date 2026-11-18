@@ -410,7 +410,7 @@ def multi_horizon_backtest(y, models, horizon=12, origins=4, min_train=60):
     return pd.DataFrame(rows),pd.DataFrame(failures)
 
 with tabs[4]:
-    st.subheader("Automatic Evaluation and Forecast")
+    st.subheader("Automatic Evaluate and Forecast")
     st.caption("Automatically evaluates candidate models on the selected State/UT and sector, selects the lowest-RMSE model on common validation origins, and generates the future forecast.")
     st.caption("Research evaluation note: the bundled independent fixed-origin holdout covers June 2022–May 2023, trained only through May 2022. It is a separate benchmark result; changing uploaded data or model settings does not automatically rerun that archived experiment.")
     st.write("The app now restores all 12 candidate methods from the earlier research versions so they can be compared against the focused seven-model set under the same rolling-origin evaluation design.")
@@ -429,26 +429,33 @@ with tabs[4]:
         else:
             with st.spinner("Running recursive multi-step validation; statistical and tree models are refitted at each forecast step..."):
                 mh_results,mh_fail=multi_horizon_backtest(yoy,mh_models,mh_horizon,mh_origins,mh_train)
-            if mh_results.empty: st.error("No valid multi-step forecast runs. Reduce minimum training months or horizon.")
+            if mh_results.empty:
+                st.error("No valid multi-step forecast runs. Reduce minimum training months or horizon.")
             else:
                 agg=mh_results.groupby(["Model","Horizon"]).agg(MAE=("Error",lambda x:float(np.mean(np.abs(x)))),RMSE=("Error",lambda x:float(np.sqrt(np.mean(np.square(x))))),Bias=("Error","mean"),N=("Error","size")).reset_index()
+                overall=mh_results.groupby("Model").agg(MAE=("Error",lambda x:float(np.mean(np.abs(x)))),RMSE=("Error",lambda x:float(np.sqrt(np.mean(np.square(x))))),Bias=("Error","mean"),Predictions=("Error","size")).reset_index().sort_values("RMSE")
                 st.session_state["export_multi_step_predictions"] = mh_results.copy()
                 st.session_state["export_multi_step_metrics"] = agg.copy()
-                st.markdown("**Error by forecast horizon** (percentage points; N counts origin-target predictions)")
-                st.dataframe(agg.round(3),use_container_width=True,hide_index=True)
-                fig=px.line(agg,x="Horizon",y="RMSE",color="Model",markers=True,title="RMSE increases or changes with forecast horizon")
-                fig.update_layout(height=420,xaxis_title="Months ahead",yaxis_title="RMSE (percentage points)")
-                st.plotly_chart(fig,use_container_width=True)
-                overall=mh_results.groupby("Model").agg(MAE=("Error",lambda x:float(np.mean(np.abs(x)))),RMSE=("Error",lambda x:float(np.sqrt(np.mean(np.square(x))))),Bias=("Error","mean"),Predictions=("Error","size")).reset_index().sort_values("RMSE")
-                st.markdown("**Overall across all evaluated horizons**")
-                st.dataframe(overall.round(3),use_container_width=True,hide_index=True)
-                st.download_button("Download multi-step predictions",mh_results.to_csv(index=False).encode(),"Repeated_Origin_Multi_Horizon_Predictions.csv","text/csv")
-                st.download_button("Download horizon metrics",agg.to_csv(index=False).encode(),"Repeated_Origin_Horizon_Metrics.csv","text/csv")
-                if not mh_fail.empty:
-                    st.warning("Some model-origin runs failed; inspect the failure log before interpreting comparisons.")
-                    st.dataframe(mh_fail,use_container_width=True,hide_index=True)
-                    st.download_button("Download multi-step failure log",mh_fail.to_csv(index=False).encode(),"Repeated_Origin_Failures.csv","text/csv")
-                st.info("Origins are overlapping expanding-window forecasts. Prediction rows are not independent; report the number of origins separately and avoid treating every horizon row as an independent sample.")
+                st.session_state["multi_step_validation_snapshot"] = {"state":state,"sector":sector,"horizon":mh_horizon,"origins":mh_origins,"min_train":mh_train,"models":list(mh_models),"predictions":mh_results.copy(),"metrics":agg.copy(),"overall":overall.copy(),"failures":mh_fail.copy()}
+
+    saved_mh=st.session_state.get("multi_step_validation_snapshot")
+    if saved_mh and saved_mh.get("state")==state and saved_mh.get("sector")==sector:
+        mh_results_saved=saved_mh["predictions"]; agg_saved=saved_mh["metrics"]; overall_saved=saved_mh["overall"]; mh_fail_saved=saved_mh["failures"]
+        st.caption(f"Saved multi-step validation · {saved_mh['horizon']} months · {saved_mh['origins']} origins · {len(saved_mh['models'])} models")
+        st.markdown("**Error by forecast horizon** (percentage points; N counts origin-target predictions)")
+        st.dataframe(agg_saved.round(3),use_container_width=True,hide_index=True)
+        fig=px.line(agg_saved,x="Horizon",y="RMSE",color="Model",markers=True,title="RMSE increases or changes with forecast horizon")
+        fig.update_layout(height=420,xaxis_title="Months ahead",yaxis_title="RMSE (percentage points)")
+        st.plotly_chart(fig,use_container_width=True)
+        st.markdown("**Overall across all evaluated horizons**")
+        st.dataframe(overall_saved.round(3),use_container_width=True,hide_index=True)
+        st.download_button("Download multi-step predictions",mh_results_saved.to_csv(index=False).encode(),"Repeated_Origin_Multi_Horizon_Predictions.csv","text/csv",key="persist_mh_predictions")
+        st.download_button("Download horizon metrics",agg_saved.to_csv(index=False).encode(),"Repeated_Origin_Horizon_Metrics.csv","text/csv",key="persist_mh_metrics")
+        if isinstance(mh_fail_saved,pd.DataFrame) and not mh_fail_saved.empty:
+            st.warning("Some model-origin runs failed; inspect the failure log before interpreting comparisons.")
+            st.dataframe(mh_fail_saved,use_container_width=True,hide_index=True)
+            st.download_button("Download multi-step failure log",mh_fail_saved.to_csv(index=False).encode(),"Repeated_Origin_Failures.csv","text/csv",key="persist_mh_failures")
+        st.info("Origins are overlapping expanding-window forecasts. Prediction rows are not independent; report the number of origins separately and avoid treating every horizon row as an independent sample.")
     st.divider()
     horizon=st.slider("Forecast horizon (months)",3,24,12)
     origins=st.slider("Rolling-origin evaluation months",6,24,18)
@@ -633,58 +640,48 @@ with tabs[4]:
     if st.button("Evaluate selected model and forecast",key="manual_eval_forecast",use_container_width=True):
         try:
             manual_bt=rolling_eval(yoy,manual_model,origins=origins,min_train=min_train)
-            manual_err=manual_bt["Actual"]-manual_bt["Predicted"]
             manual_mae=float(mean_absolute_error(manual_bt["Actual"],manual_bt["Predicted"]))
             manual_rmse=float(np.sqrt(mean_squared_error(manual_bt["Actual"],manual_bt["Predicted"])))
             manual_bias=float((manual_bt["Predicted"]-manual_bt["Actual"]).mean())
-            st.session_state["manual_cpi_result"]={
-                "model":manual_model,"state":state,"sector":sector,"horizon":horizon,
-                "origins":len(manual_bt),"mae":manual_mae,"rmse":manual_rmse,"bias":manual_bias,
-                "backtest":manual_bt
-            }
             manual_history=longest_contiguous(yoy)
+            manual_fc=None
+            manual_error=None
             if len(manual_history)<min_train:
-                st.error(f"Need at least {min_train} consecutive observations. Available: {len(manual_history)}.")
+                manual_error=f"Need at least {min_train} consecutive observations. Available: {len(manual_history)}."
             else:
-                hist=manual_history.copy()
-                manual_preds=[]
+                hist=manual_history.copy(); manual_preds=[]
                 for _ in range(horizon):
-                    value=float(one_step(hist,manual_model))
-                    manual_preds.append(value)
+                    value=float(one_step(hist,manual_model)); manual_preds.append(value)
                     hist.loc[hist.index[-1]+pd.offsets.MonthBegin(1)]=value
                 manual_dates=pd.date_range(manual_history.index[-1]+pd.offsets.MonthBegin(1),periods=horizon,freq="MS")
                 manual_abs_err=np.abs(manual_bt["Actual"]-manual_bt["Predicted"])
                 manual_q90=float(np.quantile(manual_abs_err,0.90))
-                manual_fc=pd.DataFrame({
-                    "Date":manual_dates,"Forecast":manual_preds,
-                    "Lower empirical band":np.array(manual_preds)-manual_q90,
-                    "Upper empirical band":np.array(manual_preds)+manual_q90
-                })
-                st.success(f"Manual result: {manual_model} · {len(manual_bt)} rolling origins · RMSE {manual_rmse:.3f} pp.")
-                m1,m2,m3=st.columns(3)
-                m1.metric("MAE (pp)",f"{manual_mae:.3f}")
-                m2.metric("RMSE (pp)",f"{manual_rmse:.3f}")
-                m3.metric("Bias (pp)",f"{manual_bias:.3f}")
-                backfig=go.Figure()
-                backfig.add_trace(go.Scatter(x=manual_bt.index,y=manual_bt["Actual"],name="Actual"))
-                backfig.add_trace(go.Scatter(x=manual_bt.index,y=manual_bt["Predicted"],name="One-step predictions"))
-                backfig.update_layout(height=360,title=f"{manual_model} · rolling-origin evaluation",yaxis_title="YoY inflation (%)")
-                st.plotly_chart(backfig,use_container_width=True)
-                fcfig=go.Figure()
-                fcfig.add_trace(go.Scatter(x=yoy.index,y=yoy.values,name="Historical YoY inflation"))
-                fcfig.add_trace(go.Scatter(x=manual_fc["Date"],y=manual_fc["Forecast"],name=f"{manual_model} forecast"))
-                fcfig.add_trace(go.Scatter(x=manual_fc["Date"],y=manual_fc["Upper empirical band"],line=dict(width=0),showlegend=False))
-                fcfig.add_trace(go.Scatter(x=manual_fc["Date"],y=manual_fc["Lower empirical band"],fill="tonexty",line=dict(width=0),name="Empirical 90th-percentile absolute-error envelope"))
-                fcfig.update_layout(height=390,title=f"Manual {manual_model} forecast · {state} · {sector}",yaxis_title="Inflation (%)")
-                st.plotly_chart(fcfig,use_container_width=True)
-                st.session_state["export_manual_forecast"] = manual_fc.copy()
-                st.dataframe(manual_fc,use_container_width=True,hide_index=True)
-                st.download_button("Download manual forecast CSV",manual_fc.to_csv(index=False).encode(),
-                                   f"manual_forecast_{state}_{sector}_{manual_model.replace(' ','_')}.csv","text/csv",
-                                   key="download_manual_forecast")
-                st.info("Manual mode forecasts with the selected model regardless of its ranking. Empirical bands are descriptive historical-error bands, not calibrated prediction intervals.")
+                manual_fc=pd.DataFrame({"Date":manual_dates,"Forecast":manual_preds,"Lower empirical band":np.array(manual_preds)-manual_q90,"Upper empirical band":np.array(manual_preds)+manual_q90})
+                st.session_state["export_manual_forecast"]=manual_fc.copy()
+            st.session_state["manual_evaluation_snapshot"]={"model":manual_model,"state":state,"sector":sector,"horizon":horizon,"origins":len(manual_bt),"mae":manual_mae,"rmse":manual_rmse,"bias":manual_bias,"backtest":manual_bt.copy(),"forecast":manual_fc.copy() if manual_fc is not None else None,"error":manual_error,"min_train":min_train}
+            st.session_state["manual_cpi_result"]={"model":manual_model,"state":state,"sector":sector,"horizon":horizon,"origins":len(manual_bt),"mae":manual_mae,"rmse":manual_rmse,"bias":manual_bias,"backtest":manual_bt.copy()}
         except Exception as e:
             st.error(f"Manual evaluation/forecast failed for {manual_model}: {e}")
+
+    saved_manual=st.session_state.get("manual_evaluation_snapshot")
+    if saved_manual and saved_manual.get("state")==state and saved_manual.get("sector")==sector:
+        manual_bt_saved=saved_manual["backtest"]; manual_fc_saved=saved_manual.get("forecast")
+        st.caption(f"Saved manual result · {saved_manual['model']} · {saved_manual['origins']} rolling origins")
+        st.success(f"Manual result: {saved_manual['model']} · {saved_manual['origins']} rolling origins · RMSE {saved_manual['rmse']:.3f} pp.")
+        m1,m2,m3=st.columns(3)
+        m1.metric("MAE (pp)",f"{saved_manual['mae']:.3f}"); m2.metric("RMSE (pp)",f"{saved_manual['rmse']:.3f}"); m3.metric("Bias (pp)",f"{saved_manual['bias']:.3f}")
+        backfig=go.Figure(); backfig.add_trace(go.Scatter(x=manual_bt_saved.index,y=manual_bt_saved["Actual"],name="Actual")); backfig.add_trace(go.Scatter(x=manual_bt_saved.index,y=manual_bt_saved["Predicted"],name="One-step predictions"))
+        backfig.update_layout(height=360,title=f"{saved_manual['model']} · rolling-origin evaluation",yaxis_title="YoY inflation (%)")
+        st.plotly_chart(backfig,use_container_width=True)
+        if isinstance(manual_fc_saved,pd.DataFrame) and not manual_fc_saved.empty:
+            fcfig=go.Figure(); fcfig.add_trace(go.Scatter(x=yoy.index,y=yoy.values,name="Historical YoY inflation")); fcfig.add_trace(go.Scatter(x=manual_fc_saved["Date"],y=manual_fc_saved["Forecast"],name=f"{saved_manual['model']} forecast")); fcfig.add_trace(go.Scatter(x=manual_fc_saved["Date"],y=manual_fc_saved["Upper empirical band"],line=dict(width=0),showlegend=False)); fcfig.add_trace(go.Scatter(x=manual_fc_saved["Date"],y=manual_fc_saved["Lower empirical band"],fill="tonexty",line=dict(width=0),name="Empirical 90th-percentile absolute-error envelope"))
+            fcfig.update_layout(height=390,title=f"Manual {saved_manual['model']} forecast · {state} · {sector}",yaxis_title="Inflation (%)")
+            st.plotly_chart(fcfig,use_container_width=True)
+            st.dataframe(manual_fc_saved,use_container_width=True,hide_index=True)
+            st.download_button("Download manual forecast CSV",manual_fc_saved.to_csv(index=False).encode(),f"manual_forecast_{state}_{sector}_{saved_manual['model'].replace(' ','_')}.csv","text/csv",key="download_manual_forecast")
+            st.info("Manual mode forecasts with the selected model regardless of its ranking. Empirical bands are descriptive historical-error bands, not calibrated prediction intervals.")
+        elif saved_manual.get("error"):
+            st.error(saved_manual["error"])
 
 with tabs[1]:
     st.subheader("Data quality, active dataset and downloads")
