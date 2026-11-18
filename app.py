@@ -385,6 +385,68 @@ def rolling_eval(y,model,origins=18,min_train=36):
     out.attrs["fit_errors"]=errors
     return out
 
+def multi_step_forecast(train, model, horizon):
+    """Fit once at each forecast origin and recursively predict the requested horizon."""
+    train=pd.Series(train,dtype=float)
+    if train.isna().any(): raise ValueError("Missing values in training window.")
+    horizon=int(horizon)
+    if model=="Naive":
+        return np.repeat(float(train.iloc[-1]),horizon)
+    if model=="Seasonal Naive":
+        if len(train)<12: raise ValueError("Needs 12+ months.")
+        return np.resize(train.iloc[-12:].to_numpy(dtype=float),horizon)
+    if model=="Moving Average (3-month)":
+        hist=train.copy(); preds=[]
+        for _ in range(horizon):
+            pred=float(hist.iloc[-3:].mean()); preds.append(pred)
+            hist.loc[hist.index[-1]+pd.offsets.MonthBegin(1)]=pred
+        return np.asarray(preds)
+    if model=="Drift":
+        if len(train)<2: raise ValueError("Needs 2+ months.")
+        drift=float((train.iloc[-1]-train.iloc[0])/(len(train)-1))
+        return np.asarray([float(train.iloc[-1]+step*drift) for step in range(1,horizon+1)])
+    if model=="Holt Linear":
+        from statsmodels.tsa.holtwinters import Holt
+        fit=Holt(train,initialization_method="estimated").fit(optimized=True)
+        return np.asarray(fit.forecast(horizon),dtype=float)
+    if model=="Theta":
+        from statsmodels.tsa.forecasting.theta import ThetaModel
+        if len(train)<24: raise ValueError("Needs 24+ months.")
+        fit=ThetaModel(train,period=12,deseasonalize=True).fit()
+        return np.asarray(fit.forecast(horizon),dtype=float)
+    if model=="ETS (Holt-Winters)":
+        if len(train)<24: raise ValueError("Needs 24+ months.")
+        fit=ExponentialSmoothing(train,trend="add",damped_trend=True,seasonal="add",seasonal_periods=12,initialization_method="estimated").fit(optimized=True)
+        return np.asarray(fit.forecast(horizon),dtype=float)
+    if model=="SARIMA":
+        if len(train)<36: raise ValueError("Needs 36+ months.")
+        fit=SARIMAX(train,order=(1,0,1),seasonal_order=(1,0,0,12),enforce_stationarity=False,enforce_invertibility=False).fit(disp=False)
+        return np.asarray(fit.forecast(horizon),dtype=float)
+    features=make_features(train)
+    if len(features)<20: raise ValueError("Not enough lagged rows for ML model.")
+    X,target=features.drop(columns="y"),features.y
+    if model=="Random Forest":
+        estimator=RandomForestRegressor(n_estimators=60,max_depth=5,min_samples_leaf=2,random_state=42,n_jobs=-1)
+    elif model=="Extra Trees":
+        from sklearn.ensemble import ExtraTreesRegressor
+        estimator=ExtraTreesRegressor(n_estimators=60,max_depth=6,min_samples_leaf=2,random_state=42,n_jobs=-1)
+    elif model=="Gradient Boosting":
+        from sklearn.ensemble import HistGradientBoostingRegressor
+        estimator=HistGradientBoostingRegressor(max_iter=200,learning_rate=.05,max_leaf_nodes=15,l2_regularization=1.0,random_state=42)
+    elif model=="XGBoost":
+        from xgboost import XGBRegressor
+        estimator=XGBRegressor(n_estimators=60,max_depth=3,learning_rate=.03,subsample=.85,colsample_bytree=.85,objective="reg:squarederror",random_state=42,n_jobs=4)
+    else: raise ValueError("Unknown model")
+    estimator.fit(X,target)
+    hist=train.copy(); preds=[]
+    for _ in range(horizon):
+        row={f"lag{k}":float(hist.iloc[-k]) for k in [1,2,3,6,12,24]}
+        pred=float(estimator.predict(pd.DataFrame([row]))[0])
+        if not np.isfinite(pred): raise ValueError("Model returned a non-finite prediction.")
+        preds.append(pred)
+        hist.loc[hist.index[-1]+pd.offsets.MonthBegin(1)]=pred
+    return np.asarray(preds,dtype=float)
+
 def multi_horizon_backtest(y, models, horizon=12, origins=4, min_train=60):
     """Expanding-window recursive h-step evaluation. Each origin is scored at horizons 1..H."""
     y=y.asfreq("MS")
@@ -396,21 +458,20 @@ def multi_horizon_backtest(y, models, horizon=12, origins=4, min_train=60):
         actual=y.iloc[pos:pos+horizon]
         if len(train)<min_train or len(actual)!=horizon or actual.isna().any():
             continue
+        if train.empty or train.index[-1] != y.index[pos-1]:
+            continue
         origin_date=y.index[pos-1]
         for model in models:
-            hist=train.copy()
             try:
-                for h in range(1,horizon+1):
-                    pred=float(one_step(hist,model))
-                    if not np.isfinite(pred): raise ValueError("non-finite prediction")
-                    rows.append({"Model":model,"Origin":origin_date,"Target date":actual.index[h-1],"Horizon":h,"Actual":float(actual.iloc[h-1]),"Forecast":pred,"Error":pred-float(actual.iloc[h-1])})
-                    hist.loc[actual.index[h-1]]=pred
+                path=multi_step_forecast(train,model,horizon)
+                for h,pred in enumerate(path,1):
+                    rows.append({"Model":model,"Origin":origin_date,"Target date":actual.index[h-1],"Horizon":h,"Actual":float(actual.iloc[h-1]),"Forecast":float(pred),"Error":float(pred)-float(actual.iloc[h-1])})
             except Exception as e:
                 failures.append({"Model":model,"Origin":origin_date,"Reason":str(e)})
     return pd.DataFrame(rows),pd.DataFrame(failures)
 
 with tabs[4]:
-    st.caption("Automatically evaluates candidate models on the selected State/UT and sector, selects the lowest-RMSE model on common validation origins, and generates the future forecast.")
+    st.caption("Automatically evaluates candidate models on the selected State/UT and sector using recursive multi-step rolling-origin validation, selects the lowest-RMSE method on common forecast paths, and generates the future forecast.")
     st.caption("Research evaluation note: the bundled independent fixed-origin holdout covers June 2022–May 2023, trained only through May 2022. It is a separate benchmark result; changing uploaded data or model settings does not automatically rerun that archived experiment.")
     st.write("The app now restores all 12 candidate methods from the earlier research versions so they can be compared against the focused seven-model set under the same rolling-origin evaluation design.")
     st.info("Comparison groups: Naive and Seasonal Naive are benchmarks; Moving Average and Drift are simple statistical baselines; Holt Linear, Theta, ETS and SARIMA are statistical forecasting methods; Random Forest and Extra Trees are tree ensembles; Gradient Boosting and XGBoost are boosting methods. Restoring a model does not imply it is better. Retain models only when common-origin out-of-sample results support them.")
@@ -457,178 +518,157 @@ with tabs[4]:
         st.info("Origins are overlapping expanding-window forecasts. Prediction rows are not independent; report the number of origins separately and avoid treating every horizon row as an independent sample.")
     st.divider()
     st.subheader("Automatic Evaluate and Forecast")
-    horizon=st.slider("Forecast horizon (months)",3,24,12)
-    origins=st.slider("Rolling-origin evaluation months",6,24,18)
-    min_train=st.slider("Minimum training history (months)",24,60,36,step=12)
+    horizon=st.slider("Forecast horizon used for evaluation and final forecast (months)",3,24,12)
+    origins=st.slider("Rolling forecast origins (each origin predicts the full horizon)",3,8,6)
+    min_train=st.select_slider("Minimum training history (months)",[48,60,72],value=72)
     models=st.multiselect("Candidate methods",MODEL_NAMES,default=MODEL_NAMES,
-                         help="All 12 methods are selected by default for the controlled comparison. You can deselect methods for a smaller run.")
+                         help="All 12 individual methods are selected by default for the controlled multi-step comparison.")
     include_ensembles=st.checkbox("Evaluate pairwise and multi-model combinations",value=True)
     y=(long[(long["State/UT"]==state)&(long.Sector==sector)].sort_values("Date").set_index("Date")["CPI"].asfreq("MS"))
     yoy=(y/y.shift(12)-1)*100
     recent=longest_contiguous(yoy)
     st.caption(f"Observed YoY points: {int(yoy.notna().sum())} · Longest consecutive recent run: {len(recent)} months.")
+    st.info("Model selection is based on recursive multi-step errors across the selected forecast horizon. A 12-month forecast is therefore compared using 12-month-ahead paths, not only one-month-ahead errors. All candidates are scored on the same complete forecast origins and horizons.")
     if st.button("Run Automatic Evaluation and Forecast",type="primary",use_container_width=True):
         if not models: st.warning("Choose at least one candidate model.")
+        elif len(recent)<min_train+horizon: st.error(f"This series needs at least {min_train+horizon} consecutive YoY observations for the selected training history and forecast horizon; it has {len(recent)}.")
         else:
-            progress=st.progress(0); status=st.empty()
-            results=[]; backtests={}; failures=[]
-            for i,m in enumerate(models,1):
-                status.info(f"Testing {m} ({i}/{len(models)})")
-                try:
-                    bt=rolling_eval(yoy,m,origins=origins,min_train=min_train)
-                    backtests[m]=bt
-                    if bt.attrs.get("fit_errors"):
-                        failures.append({"Model":m,"Reason":"Some origins failed: "+" | ".join(bt.attrs["fit_errors"][-2:])})
-                    err=bt.Actual-bt.Predicted
-                    scale=float(np.mean(np.abs(np.diff(yoy.dropna().values)))) if yoy.dropna().shape[0]>1 else np.nan
-                    results.append({"Model":m,"Type":"Individual","Origins":len(bt),
-                        "MAE (pp)":mean_absolute_error(bt.Actual,bt.Predicted),
-                        "RMSE (pp)":np.sqrt(mean_squared_error(bt.Actual,bt.Predicted)),
-                        "MASE":mean_absolute_error(bt.Actual,bt.Predicted)/scale if scale and np.isfinite(scale) else np.nan,
-                        "Bias (pp)":float((bt.Predicted-bt.Actual).mean())})
-                except Exception as e: failures.append({"Model":m,"Reason":str(e)})
-                progress.progress(i/len(models))
-            progress.empty(); status.empty()
-            ensemble_components={}
-            # Establish the common-origin MASE scale before calculating ensemble metrics.
-            # It is based only on observations available before the shared evaluation window.
-            scale_common = np.nan
-            if backtests:
-                common_for_scale = sorted(set.intersection(*[set(bt.index) for bt in backtests.values()]))
-                if len(common_for_scale) >= 5:
-                    scale_train_for_common = yoy.loc[yoy.index < common_for_scale[0]].dropna()
-                    scale_common = float(np.mean(np.abs(np.diff(scale_train_for_common.values)))) if len(scale_train_for_common) > 1 else np.nan
-            if failures:
-                st.warning("Some methods were ineligible or failed; successful methods remain in the comparison.")
-                st.dataframe(pd.DataFrame(failures),use_container_width=True,hide_index=True)
-            if include_ensembles and len(backtests)>=2:
-                common=sorted(set.intersection(*[set(bt.index) for bt in backtests.values()]))
-                if len(common)>=5:
-                    actual=backtests[next(iter(backtests))].loc[common,"Actual"]
-                    aligned={m:bt.loc[common,"Predicted"] for m,bt in backtests.items()}
-                    for a,b in itertools.combinations(aligned,2):
-                        pred=(aligned[a]+aligned[b])/2
-                        name=f"Pairwise: {a} + {b}"
-                        ensemble_components[name]=[a,b]
-                        results.append({"Model":name,"Type":"Pairwise ensemble","Origins":len(common),
-                            "MAE (pp)":mean_absolute_error(actual,pred),"RMSE (pp)":np.sqrt(mean_squared_error(actual,pred)),
-                            "MASE":mean_absolute_error(actual,pred)/scale_common if scale_common and np.isfinite(scale_common) else np.nan,
-                            "Bias (pp)":float((pred-actual).mean())})
-                    names=list(aligned)
-                    pred_equal=pd.concat([aligned[n] for n in names],axis=1).mean(axis=1)
-                    name="Ensemble: equal-weight all models"; ensemble_components[name]=names
-                    results.append({"Model":name,"Type":"Multi-model ensemble","Origins":len(common),
-                        "MAE (pp)":mean_absolute_error(actual,pred_equal),"RMSE (pp)":np.sqrt(mean_squared_error(actual,pred_equal)),
-                        "MASE":mean_absolute_error(actual,pred_equal)/scale_common if scale_common and np.isfinite(scale_common) else np.nan,
-                        "Bias (pp)":float((pred_equal-actual).mean())})
-                    inv={m:1/max(float(np.sqrt(np.mean((actual-aligned[m])**2))),1e-6) for m in names}
-                    pred_inv=sum(aligned[m]*inv[m] for m in names)/sum(inv.values())
-                    name="Ensemble: inverse-RMSE weighted"; ensemble_components[name]=names
-                    results.append({"Model":name,"Type":"Multi-model ensemble","Origins":len(common),
-                        "MAE (pp)":mean_absolute_error(actual,pred_inv),"RMSE (pp)":np.sqrt(mean_squared_error(actual,pred_inv)),
-                        "MASE":mean_absolute_error(actual,pred_inv)/scale_common if scale_common and np.isfinite(scale_common) else np.nan,
-                        "Bias (pp)":float((pred_inv-actual).mean())})
-                    st.session_state["cpi_ensemble_components"]=ensemble_components
-                    st.session_state["cpi_ensemble_weights"]=inv
-            # Re-score every successful individual model on the same common forecast origins.
-            # This prevents a model with an easier/shorter test window from winning the leaderboard.
-            if backtests:
-                common_eval = sorted(set.intersection(*[set(bt.index) for bt in backtests.values()]))
-                if len(common_eval) >= 5:
-                    results = [r for r in results if r["Type"] != "Individual"]
-                    common_actual = backtests[next(iter(backtests))].loc[common_eval, "Actual"]
-                    scale_train = yoy.loc[yoy.index < common_eval[0]].dropna()
-                    scale_common = float(np.mean(np.abs(np.diff(scale_train.values)))) if len(scale_train) > 1 else np.nan
-                    for model_name, bt in backtests.items():
-                        actual_common = bt.loc[common_eval, "Actual"]
-                        pred_common = bt.loc[common_eval, "Predicted"]
-                        err_common = actual_common - pred_common
-                        results.append({
-                            "Model": model_name, "Type": "Individual", "Origins": len(common_eval),
-                            "MAE (pp)": mean_absolute_error(actual_common, pred_common),
-                            "RMSE (pp)": np.sqrt(mean_squared_error(actual_common, pred_common)),
-                            "MASE": mean_absolute_error(actual_common, pred_common) / scale_common if scale_common and np.isfinite(scale_common) else np.nan,
-                            "Bias (pp)": float((pred_common-actual_common).mean())
-                        })
-                else:
-                    results = []
-                    st.error("The successful models do not share at least five identical forecast origins. No best-model ranking is reported; adjust the test window or candidate models.")
-            if results:
-                score=pd.DataFrame(results).sort_values("RMSE (pp)").reset_index(drop=True)
-                winner=str(score.iloc[0].Model)
-                train=longest_contiguous(yoy)
-                fc=None
-                if len(train)>=min_train:
-                    components=st.session_state.get("cpi_ensemble_components",{})
-                    weights=st.session_state.get("cpi_ensemble_weights",{})
-                    hist=train.copy(); preds=[]
-                    for _ in range(horizon):
-                        if winner in backtests: pred=one_step(hist,winner)
-                        else:
-                            members=components[winner]
-                            member_pred={m:one_step(hist,m) for m in members}
-                            if winner=="Ensemble: inverse-RMSE weighted":
-                                pred=sum(member_pred[m]*weights[m] for m in members)/sum(weights[m] for m in members)
-                            else: pred=float(np.mean(list(member_pred.values())))
-                        preds.append(float(pred))
-                        hist.loc[hist.index[-1]+pd.offsets.MonthBegin(1)]=pred
-                    dates_fc=pd.date_range(train.index[-1]+pd.offsets.MonthBegin(1),periods=horizon,freq="MS")
-                    if winner in backtests:
-                        abs_err=np.abs(backtests[winner].Actual-backtests[winner].Predicted)
-                    else:
-                        members=components[winner]
-                        common=sorted(set.intersection(*[set(backtests[m].index) for m in members]))
-                        actual=backtests[members[0]].loc[common,"Actual"]
-                        if winner=="Ensemble: inverse-RMSE weighted":
-                            fitted=sum(backtests[m].loc[common,"Predicted"]*weights[m] for m in members)/sum(weights[m] for m in members)
-                        else: fitted=sum(backtests[m].loc[common,"Predicted"] for m in members)/len(members)
-                        abs_err=np.abs(actual-fitted)
-                    q90=float(np.quantile(abs_err,.90))
-                    fc=pd.DataFrame({"Date":dates_fc,"Forecast":preds,"Lower empirical band":np.array(preds)-q90,"Upper empirical band":np.array(preds)+q90})
-                    st.session_state["export_automatic_forecast"] = fc.copy()
-                else:
-                    st.session_state.pop("export_automatic_forecast", None)
-                st.session_state["export_automatic_model_comparison"] = score.copy()
-                st.session_state["automatic_evaluation_snapshot"] = {
-                    "state":state, "sector":sector, "horizon":horizon,
-                    "score":score.copy(), "backtests":{m:bt.copy() for m,bt in backtests.items()},
-                    "winner":winner, "forecast":fc.copy() if fc is not None else None,
-                    "min_train":min_train
-                }
+            with st.spinner("Running recursive multi-step backtests for the selected methods..."):
+                mh_results,mh_fail=multi_horizon_backtest(yoy,models,horizon,origins,min_train)
+            if mh_results.empty:
+                st.error("No candidate model produced a valid multi-step backtest. Reduce the horizon or minimum training history, or inspect the data continuity.")
             else:
-                st.error("No candidate model produced enough valid backtests. Review the failure reasons.")
+                # Retain only complete origin × horizon paths, then compare every method on the same paths.
+                model_frames={}
+                for model_name in models:
+                    part=mh_results[mh_results["Model"]==model_name].copy()
+                    if part.empty: continue
+                    complete_origins=part.groupby("Origin")["Horizon"].nunique()
+                    complete_origins=complete_origins[complete_origins==horizon].index
+                    part=part[part["Origin"].isin(complete_origins)].copy()
+                    if not part.empty:
+                        part=part.rename(columns={"Target date":"Date","Forecast":"Predicted"})
+                        model_frames[model_name]=part.set_index(["Origin","Horizon"]).sort_index()[["Date","Actual","Predicted"]]
+                if len(model_frames)<1:
+                    st.error("No method completed a full forecast horizon. Try a shorter horizon or lower minimum training history.")
+                else:
+                    common_origins=set.intersection(*[set(frame.index.get_level_values("Origin")) for frame in model_frames.values()])
+                    common_origins=sorted(common_origins)
+                    if len(common_origins)<3:
+                        st.error("Fewer than three common complete forecast origins are available across the successful methods. No best-model ranking is reported; try fewer candidate methods, a shorter horizon or a lower minimum training history.")
+                    else:
+                        common_index=pd.MultiIndex.from_product([common_origins,range(1,horizon+1)],names=["Origin","Horizon"])
+                        model_frames={m:frame.loc[common_index] for m,frame in model_frames.items()}
+                        first_model=next(iter(model_frames))
+                        actual=model_frames[first_model]["Actual"]
+                        score_rows=[]
+                        aligned={m:frame["Predicted"] for m,frame in model_frames.items()}
+                        scale_train=yoy.loc[yoy.index<common_origins[0]].dropna()
+                        scale_common=float(np.mean(np.abs(np.diff(scale_train.values)))) if len(scale_train)>1 else np.nan
+                        for model_name,pred in aligned.items():
+                            err=pred-actual; mae=float(np.mean(np.abs(err)))
+                            score_rows.append({"Model":model_name,"Type":"Individual","Origins":len(common_origins),"Forecast errors":len(common_index),
+                                "MAE (pp)":mae,"RMSE (pp)":float(np.sqrt(np.mean(np.square(err)))),
+                                "MASE":mae/scale_common if scale_common and np.isfinite(scale_common) else np.nan,"Bias (pp)":float(err.mean())})
+
+                        ensemble_components={}
+                        if include_ensembles and len(aligned)>=2:
+                            for a,b in itertools.combinations(aligned,2):
+                                name=f"Pairwise: {a} + {b}"; pred=(aligned[a]+aligned[b])/2.0
+                                ensemble_components[name]=[a,b]; err=pred-actual; mae=float(np.mean(np.abs(err)))
+                                score_rows.append({"Model":name,"Type":"Pairwise ensemble","Origins":len(common_origins),"Forecast errors":len(common_index),
+                                    "MAE (pp)":mae,"RMSE (pp)":float(np.sqrt(np.mean(np.square(err)))),
+                                    "MASE":mae/scale_common if scale_common and np.isfinite(scale_common) else np.nan,"Bias (pp)":float(err.mean())})
+                            names=list(aligned); name="Ensemble: equal-weight all models"
+                            pred=pd.concat([aligned[m] for m in names],axis=1).mean(axis=1)
+                            ensemble_components[name]=names; err=pred-actual; mae=float(np.mean(np.abs(err)))
+                            score_rows.append({"Model":name,"Type":"Multi-model ensemble","Origins":len(common_origins),"Forecast errors":len(common_index),
+                                "MAE (pp)":mae,"RMSE (pp)":float(np.sqrt(np.mean(np.square(err)))),
+                                "MASE":mae/scale_common if scale_common and np.isfinite(scale_common) else np.nan,"Bias (pp)":float(err.mean())})
+
+                        score=pd.DataFrame(score_rows).sort_values("RMSE (pp)").reset_index(drop=True)
+                        winner=str(score.iloc[0].Model)
+                        winner_components=ensemble_components.get(winner)
+                        if winner_components is None:
+                            winner_pred=aligned[winner]
+                        else:
+                            winner_pred=pd.concat([aligned[m] for m in winner_components],axis=1).mean(axis=1)
+                        abs_err=np.abs(actual-winner_pred)
+
+                        train=longest_contiguous(yoy); fc=None
+                        if len(train)>=min_train:
+                            if winner_components is None:
+                                hist=train.copy(); preds=[]
+                                for _ in range(horizon):
+                                    value=float(one_step(hist,winner)); preds.append(value)
+                                    hist.loc[hist.index[-1]+pd.offsets.MonthBegin(1)]=value
+                            else:
+                                component_paths=[]
+                                for member in winner_components:
+                                    hist=train.copy(); path=[]
+                                    for _ in range(horizon):
+                                        value=float(one_step(hist,member)); path.append(value)
+                                        hist.loc[hist.index[-1]+pd.offsets.MonthBegin(1)]=value
+                                    component_paths.append(path)
+                                preds=np.mean(np.asarray(component_paths,dtype=float),axis=0).tolist()
+                            dates_fc=pd.date_range(train.index[-1]+pd.offsets.MonthBegin(1),periods=horizon,freq="MS")
+                            q90=float(np.quantile(abs_err,.90))
+                            fc=pd.DataFrame({"Date":dates_fc,"Forecast":preds,"Lower empirical band":np.asarray(preds)-q90,"Upper empirical band":np.asarray(preds)+q90})
+                            st.session_state["export_automatic_forecast"]=fc.copy()
+                        else:
+                            st.session_state.pop("export_automatic_forecast",None)
+
+                        st.session_state["export_automatic_model_comparison"]=score.copy()
+                        st.session_state["automatic_evaluation_snapshot"]={
+                            "state":state,"sector":sector,"horizon":horizon,"origins":len(common_origins),
+                            "score":score.copy(),"backtests":{m:bt.copy() for m,bt in model_frames.items()},
+                            "winner":winner,"winner_components":winner_components,"forecast":fc.copy() if fc is not None else None,
+                            "min_train":min_train,"validation_method":"recursive multi-step common-origin evaluation",
+                            "failures":mh_fail.copy() if isinstance(mh_fail,pd.DataFrame) else pd.DataFrame()}
+                        if isinstance(mh_fail,pd.DataFrame) and not mh_fail.empty:
+                            st.warning("Some model-origin runs failed. They were not included in the common-origin ranking; inspect the failure log.")
+                            st.dataframe(mh_fail,use_container_width=True,hide_index=True)
 
 
-    # Persist automatic evaluation output across Streamlit reruns (e.g. when multi-step validation is run).
+
+    # Persist automatic evaluation output across Streamlit reruns (e.g. when another workflow is run).
     saved_auto = st.session_state.get("automatic_evaluation_snapshot")
     if saved_auto and saved_auto.get("state")==state and saved_auto.get("sector")==sector:
         score_saved=saved_auto["score"]
         backtests_saved=saved_auto["backtests"]
         winner_saved=saved_auto["winner"]
+        st.caption(f"Saved automatic result · {saved_auto.get('validation_method','multi-step validation')} · {saved_auto.get('horizon')} months · {saved_auto.get('origins')} origins")
         st.markdown("#### Individual models and combinations")
         st.dataframe(score_saved.style.format({"MAE (pp)":"{:.3f}","RMSE (pp)":"{:.3f}","MASE":"{:.3f}","Bias (pp)":"{:.3f}"}),use_container_width=True,hide_index=True)
-        st.success(f"Selected: {winner_saved} · lowest RMSE {score_saved.iloc[0]['RMSE (pp)']:.3f} percentage points.")
-        st.markdown("**How to interpret:** Lower MAE and RMSE mean smaller errors. MASE below 1 means the model beats the naive scale used here. Positive bias means forecasts were too high on average; negative bias means they were too low. Always check forecast-origin counts before comparing models.")
-        fig=go.Figure()
-        for m,bt in backtests_saved.items():
-            fig.add_trace(go.Scatter(x=bt.index,y=bt.Predicted,name=m))
+        st.success(f"Selected: {winner_saved} · lowest {saved_auto.get('horizon')}-month multi-step RMSE {score_saved.iloc[0]['RMSE (pp)']:.3f} percentage points.")
+        st.markdown("**How to interpret:** Lower MAE and RMSE mean smaller errors. MASE below 1 means the model beats the training-period naive scale. Positive bias means forecasts were too high on average; negative bias means they were too low. All candidates were compared on the same complete forecast origins and horizons.")
+        winner_components=saved_auto.get("winner_components")
         if backtests_saved:
             first_saved=next(iter(backtests_saved.values()))
-            fig.add_trace(go.Scatter(x=first_saved.index,y=first_saved.Actual,name="Actual",line=dict(width=3,color="#222")))
-        fig.update_layout(height=420,title="Rolling-origin backtest",xaxis_title="",yaxis_title="YoY inflation (%)")
-        st.plotly_chart(fig,use_container_width=True)
+            latest_origin=max(first_saved.index.get_level_values("Origin"))
+            if winner_components is None:
+                validation_saved=backtests_saved[winner_saved].loc[latest_origin]
+                validation_pred=validation_saved["Predicted"].to_numpy()
+            else:
+                parts=[backtests_saved[m].loc[latest_origin,"Predicted"].to_numpy() for m in winner_components]
+                validation_pred=np.mean(np.vstack(parts),axis=0)
+            validation_dates=first_saved.loc[latest_origin,"Date"].tolist()
+            fig=go.Figure()
+            fig.add_trace(go.Scatter(x=yoy.index,y=yoy.values,name="Historical YoY inflation"))
+            fig.add_trace(go.Scatter(x=validation_dates,y=validation_pred,name=f"Validation path from {latest_origin:%b %Y}",mode="lines+markers"))
+            st.plotly_chart(fig,use_container_width=True)
         forecast_saved=saved_auto.get("forecast")
         if isinstance(forecast_saved,pd.DataFrame) and not forecast_saved.empty:
             fig=go.Figure()
             fig.add_trace(go.Scatter(x=yoy.index,y=yoy.values,name="Historical YoY inflation"))
-            fig.add_trace(go.Scatter(x=forecast_saved.Date,y=forecast_saved.Forecast,name="Forecast"))
+            fig.add_trace(go.Scatter(x=forecast_saved.Date,y=forecast_saved.Forecast,name="Forecast",mode="lines+markers"))
             fig.add_trace(go.Scatter(x=forecast_saved.Date,y=forecast_saved["Upper empirical band"],line=dict(width=0),showlegend=False))
             fig.add_trace(go.Scatter(x=forecast_saved.Date,y=forecast_saved["Lower empirical band"],fill="tonexty",line=dict(width=0),name="Empirical 90th-percentile absolute-error envelope"))
             fig.update_layout(height=420,title=f"{winner_saved} forecast · {state} · {sector}",xaxis_title="",yaxis_title="Inflation (%)")
             st.plotly_chart(fig,use_container_width=True)
             st.dataframe(forecast_saved,use_container_width=True,hide_index=True)
             st.download_button("Download forecast CSV",forecast_saved.to_csv(index=False).encode(),f"forecast_{state}_{sector}.csv","text/csv",key="persistent_auto_forecast_download")
-            st.info("This is an empirical absolute-error envelope, not a 90% prediction interval. It is not horizon-specific and has no guaranteed coverage. Use the repeated-origin horizon diagnostics and a separate calibration/coverage assessment before reporting formal 90% or 95% prediction intervals.")
+            st.info("The empirical envelope is based on absolute errors pooled across the selected multi-step validation horizons. It is descriptive, not a formally calibrated prediction interval; test coverage on a separate untouched holdout before making interval-coverage claims.")
         else:
             st.warning(f"Automatic model comparison is saved, but a future forecast could not be generated with the current minimum training requirement ({saved_auto.get('min_train')} months).")
 
