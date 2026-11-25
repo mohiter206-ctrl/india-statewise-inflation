@@ -499,7 +499,7 @@ with tabs[4]:
     st.caption("This experiment re-fits each selected model at each expanding-window origin, then recursively forecasts 1 to H months ahead. It evaluates the actual multi-step task, rather than selecting a 12-month forecast model only by one-step RMSE.")
     mh1,mh2,mh3=st.columns(3)
     mh_horizon=mh1.selectbox("Validation horizon",[3,6,12],index=2,key="mh_horizon")
-    mh_origins=mh2.selectbox("Number of rolling origins",[3,4,5,6],index=1,key="mh_origins")
+    mh_origins=mh2.selectbox("Number of rolling origins",list(range(3,13)),index=5,key="mh_origins",help="More origins provide a more stable evaluation when enough consecutive observations are available.")
     mh_train=mh3.selectbox("Minimum training months",[48,60,72],index=1,key="mh_min_train")
     mh_models=st.multiselect("Models for multi-step test",MODEL_NAMES,default=["Naive","Drift","Holt Linear","Theta","ETS (Holt-Winters)","SARIMA","Random Forest","Extra Trees"],key="mh_models")
     if st.button("Run repeated-origin multi-step validation",key="run_mh_backtest",type="primary",use_container_width=True):
@@ -537,7 +537,7 @@ with tabs[4]:
     st.divider()
     st.subheader("Automatic Evaluate and Forecast")
     horizon=st.slider("Forecast horizon used for evaluation and final forecast (months)",3,24,12)
-    origins=st.slider("Rolling forecast origins (each origin predicts the full horizon)",3,8,6)
+    origins=st.slider("Rolling forecast origins (each origin predicts the full horizon)",3,12,8)
     min_train=st.select_slider("Minimum training history (months)",[48,60,72],value=72)
     models=st.multiselect("Candidate methods",MODEL_NAMES,default=MODEL_NAMES,
                          help="All 12 individual methods are selected by default for the controlled multi-step comparison.")
@@ -630,6 +630,7 @@ with tabs[4]:
                             dates_fc=pd.date_range(train.index[-1]+pd.offsets.MonthBegin(1),periods=horizon,freq="MS")
                             q90=float(np.quantile(abs_err,.90))
                             fc=pd.DataFrame({"Date":dates_fc,"Forecast":preds,"Lower empirical band":np.asarray(preds)-q90,"Upper empirical band":np.asarray(preds)+q90})
+                            fc["Forecast Target"]=forecast_target; fc["State/UT"]=state; fc["Sector"]=sector; fc["Selected Model"]=winner; fc["Forecast Horizon (months)"]=horizon; fc["Validation Origins"]=len(common_origins)
                             st.session_state["export_automatic_forecast"]=fc.copy()
                         else:
                             st.session_state.pop("export_automatic_forecast",None)
@@ -699,6 +700,9 @@ with tabs[4]:
             manual_mae=float(mean_absolute_error(manual_bt["Actual"],manual_bt["Predicted"]))
             manual_rmse=float(np.sqrt(mean_squared_error(manual_bt["Actual"],manual_bt["Predicted"])))
             manual_bias=float((manual_bt["Predicted"]-manual_bt["Actual"]).mean())
+            manual_scale_train=longest_contiguous(forecast_series.loc[forecast_series.index < manual_bt.index.min()])
+            manual_scale=float(np.mean(np.abs(np.diff(manual_scale_train.to_numpy(dtype=float))))) if len(manual_scale_train)>1 else np.nan
+            manual_mase=manual_mae/manual_scale if manual_scale and np.isfinite(manual_scale) else np.nan
             manual_history=longest_contiguous(forecast_series)
             manual_fc=None
             manual_error=None
@@ -713,9 +717,10 @@ with tabs[4]:
                 manual_abs_err=np.abs(manual_bt["Actual"]-manual_bt["Predicted"])
                 manual_q90=float(np.quantile(manual_abs_err,0.90))
                 manual_fc=pd.DataFrame({"Date":manual_dates,"Forecast":manual_preds,"Lower empirical band":np.array(manual_preds)-manual_q90,"Upper empirical band":np.array(manual_preds)+manual_q90})
+                manual_fc["Forecast Target"]=forecast_target; manual_fc["State/UT"]=state; manual_fc["Sector"]=sector; manual_fc["Selected Model"]=manual_model; manual_fc["Forecast Horizon (months)"]=horizon; manual_fc["Validation Origins"]=len(manual_bt)
                 st.session_state["export_manual_forecast"]=manual_fc.copy()
-            st.session_state["manual_evaluation_snapshot"]={"model":manual_model,"state":state,"sector":sector,"series":forecast_target,"horizon":horizon,"origins":len(manual_bt),"mae":manual_mae,"rmse":manual_rmse,"bias":manual_bias,"backtest":manual_bt.copy(),"forecast":manual_fc.copy() if manual_fc is not None else None,"error":manual_error,"min_train":min_train}
-            st.session_state["manual_cpi_result"]={"model":manual_model,"state":state,"sector":sector,"horizon":horizon,"origins":len(manual_bt),"mae":manual_mae,"rmse":manual_rmse,"bias":manual_bias,"backtest":manual_bt.copy()}
+            st.session_state["manual_evaluation_snapshot"]={"model":manual_model,"state":state,"sector":sector,"series":forecast_target,"horizon":horizon,"origins":len(manual_bt),"mae":manual_mae,"rmse":manual_rmse,"bias":manual_bias,"mase":manual_mase,"backtest":manual_bt.copy(),"forecast":manual_fc.copy() if manual_fc is not None else None,"error":manual_error,"min_train":min_train}
+            st.session_state["manual_cpi_result"]={"model":manual_model,"state":state,"sector":sector,"horizon":horizon,"origins":len(manual_bt),"mae":manual_mae,"rmse":manual_rmse,"bias":manual_bias,"mase":manual_mase,"backtest":manual_bt.copy()}
         except Exception as e:
             st.error(f"Manual evaluation/forecast failed for {manual_model}: {e}")
 
@@ -724,11 +729,32 @@ with tabs[4]:
         manual_bt_saved=saved_manual["backtest"]; manual_fc_saved=saved_manual.get("forecast")
         st.caption(f"Saved manual result · {saved_manual['model']} · {saved_manual['origins']} rolling origins")
         st.success(f"Manual result: {saved_manual['model']} · {saved_manual['origins']} rolling origins · RMSE {saved_manual['rmse']:.3f} {series_unit}.")
-        m1,m2,m3=st.columns(3)
-        m1.metric(f"MAE ({series_unit})",f"{saved_manual['mae']:.3f}"); m2.metric(f"RMSE ({series_unit})",f"{saved_manual['rmse']:.3f}"); m3.metric(f"Bias ({series_unit})",f"{saved_manual['bias']:.3f}")
+        m1,m2,m3,m4=st.columns(4)
+        m1.metric(f"MAE ({series_unit})",f"{saved_manual['mae']:.3f}"); m2.metric(f"RMSE ({series_unit})",f"{saved_manual['rmse']:.3f}"); m3.metric(f"MASE",f"{saved_manual.get('mase',np.nan):.3f}" if np.isfinite(saved_manual.get("mase",np.nan)) else "—"); m4.metric(f"Bias ({series_unit})",f"{saved_manual['bias']:.3f}")
         backfig=go.Figure(); backfig.add_trace(go.Scatter(x=manual_bt_saved.index,y=manual_bt_saved["Actual"],name="Actual")); backfig.add_trace(go.Scatter(x=manual_bt_saved.index,y=manual_bt_saved["Predicted"],name="One-step predictions"))
         backfig.update_layout(height=360,title=f"{saved_manual['model']} · rolling-origin evaluation",yaxis_title=series_axis)
         st.plotly_chart(backfig,use_container_width=True)
+        st.markdown("#### Residual diagnostics for the selected model")
+        residuals=(manual_bt_saved["Actual"]-manual_bt_saved["Predicted"]).dropna()
+        st.caption("Residual = actual − one-step-ahead prediction. These diagnostics use the rolling-origin evaluation errors, not in-sample fitted residuals.")
+        if len(residuals)>=5:
+            rfig=go.Figure(); rfig.add_trace(go.Scatter(x=residuals.index,y=residuals.values,mode="lines+markers",name="Residual")); rfig.add_hline(y=0,line_dash="dash")
+            rfig.update_layout(height=300,title="Rolling-origin forecast residuals",xaxis_title="Date",yaxis_title=series_unit)
+            st.plotly_chart(rfig,use_container_width=True)
+            try:
+                from statsmodels.stats.diagnostic import acorr_ljungbox
+                from statsmodels.graphics.tsaplots import plot_acf
+                import matplotlib.pyplot as plt
+                max_lag=min(12,max(1,len(residuals)//5))
+                lb_res=acorr_ljungbox(residuals,lags=[max_lag],return_df=True)
+                st.dataframe(lb_res.rename_axis("Lag").reset_index().round(4),use_container_width=True,hide_index=True)
+                st.caption("Ljung–Box null: no residual autocorrelation up to the displayed lag. A small p-value indicates remaining serial dependence; interpret cautiously because rolling-origin errors overlap in time.")
+                if len(residuals)>10:
+                    fig,ax=plt.subplots(figsize=(9,2.8)); plot_acf(residuals,lags=min(12,len(residuals)//2-1),ax=ax); st.pyplot(fig); plt.close(fig)
+            except Exception as diag_exc:
+                st.info(f"Residual autocorrelation diagnostics unavailable: {diag_exc}")
+        else:
+            st.info("At least five successful rolling-origin errors are needed for residual diagnostics.")
         if isinstance(manual_fc_saved,pd.DataFrame) and not manual_fc_saved.empty:
             fcfig=go.Figure(); fcfig.add_trace(go.Scatter(x=forecast_series.index,y=forecast_series.values,name=f"Historical {forecast_target}")); fcfig.add_trace(go.Scatter(x=manual_fc_saved["Date"],y=manual_fc_saved["Forecast"],name=f"{saved_manual['model']} forecast")); fcfig.add_trace(go.Scatter(x=manual_fc_saved["Date"],y=manual_fc_saved["Upper empirical band"],line=dict(width=0),showlegend=False)); fcfig.add_trace(go.Scatter(x=manual_fc_saved["Date"],y=manual_fc_saved["Lower empirical band"],fill="tonexty",line=dict(width=0),name="Empirical 90th-percentile absolute-error envelope"))
             fcfig.update_layout(height=390,title=f"Manual {saved_manual['model']} forecast · {forecast_target} · {state} · {sector}",yaxis_title=series_axis)
@@ -941,9 +967,21 @@ def build_complete_workbook():
         ("MultiStep_Predictions","export_multi_step_predictions"),
         ("MultiStep_Metrics","export_multi_step_metrics"),
     ]
+    current_context = {"State/UT": state, "Sector": sector, "Forecast Target": forecast_target}
     for sheet,key in saved_sheets:
         value = st.session_state.get(key)
         if isinstance(value,pd.DataFrame) and not value.empty:
+            # Forecast exports carry explicit context. Do not include a previous target's results.
+            if sheet in ("Automatic_Forecast", "Manual_Forecast"):
+                if "Forecast Target" not in value.columns or not (value["Forecast Target"] == forecast_target).all():
+                    continue
+                if "State/UT" in value.columns and not (value["State/UT"] == state).all(): continue
+                if "Sector" in value.columns and not (value["Sector"] == sector).all(): continue
+            elif sheet in ("Automatic_Model_Comparison", "MultiStep_Predictions", "MultiStep_Metrics"):
+                snapshot_key = {"Automatic_Model_Comparison":"automatic_evaluation_snapshot", "MultiStep_Predictions":"multi_step_validation_snapshot", "MultiStep_Metrics":"multi_step_validation_snapshot"}[sheet]
+                snap = st.session_state.get(snapshot_key, {})
+                if snap.get("state") != state or snap.get("sector") != sector or snap.get("series") != forecast_target:
+                    continue
             tables[sheet] = value
 
     with pd.ExcelWriter(output, engine="openpyxl") as writer:
@@ -998,7 +1036,7 @@ def build_complete_workbook():
                 ycol = headers.index("RMSE")+1
                 chart = LineChart()
                 chart.title = "Multi-step RMSE by horizon"
-                chart.y_axis.title = "RMSE (pp)"
+                chart.y_axis.title = f"RMSE ({series_unit})"
                 chart.x_axis.title = "Months ahead"
                 chart.add_data(Reference(ws,min_col=ycol,min_row=1,max_row=ws.max_row),titles_from_data=True)
                 chart.set_categories(Reference(ws,min_col=xcol,min_row=2,max_row=ws.max_row))
