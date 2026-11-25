@@ -471,6 +471,24 @@ def multi_horizon_backtest(y, models, horizon=12, origins=4, min_train=60):
     return pd.DataFrame(rows),pd.DataFrame(failures)
 
 with tabs[4]:
+    st.subheader("Forecast target")
+    forecast_target = st.selectbox(
+        "Choose the series to calculate and forecast",
+        ["CPI Index", "YoY Inflation (%)"],
+        index=1,
+        key="forecast_target_series",
+        help="CPI Index forecasts the index level. YoY Inflation forecasts the percentage change from the same month one year earlier."
+    )
+    y=(long[(long["State/UT"]==state)&(long.Sector==sector)].sort_values("Date").set_index("Date")["CPI"].asfreq("MS"))
+    yoy=(y/y.shift(12)-1)*100
+    forecast_series = y if forecast_target == "CPI Index" else yoy
+    series_unit = "CPI index points" if forecast_target == "CPI Index" else "percentage points"
+    series_axis = "CPI index" if forecast_target == "CPI Index" else "YoY inflation (%)"
+    st.caption(f"Selected forecast target: **{forecast_target}**. All validation, model comparison and forecast workflows below use this series.")
+    if forecast_target == "YoY Inflation (%)":
+        st.info("YoY inflation is calculated as 100 × (CPI[t] / CPI[t−12] − 1). The first 12 months have no YoY value because a 12-month comparison is unavailable.")
+    else:
+        st.info("CPI forecasting predicts the future index level directly; it does not forecast the inflation rate.")
     st.caption("Automatically evaluates candidate models on the selected State/UT and sector using recursive multi-step rolling-origin validation, selects the lowest-RMSE method on common forecast paths, and generates the future forecast.")
     st.caption("Research evaluation note: the bundled independent fixed-origin holdout covers June 2022–May 2023, trained only through May 2022. It is a separate benchmark result; changing uploaded data or model settings does not automatically rerun that archived experiment.")
     st.write("The app now restores all 12 candidate methods from the earlier research versions so they can be compared against the focused seven-model set under the same rolling-origin evaluation design.")
@@ -488,7 +506,7 @@ with tabs[4]:
         if not mh_models: st.warning("Select at least one model.")
         else:
             with st.spinner("Running recursive multi-step validation; statistical and tree models are refitted at each forecast step..."):
-                mh_results,mh_fail=multi_horizon_backtest(yoy,mh_models,mh_horizon,mh_origins,mh_train)
+                mh_results,mh_fail=multi_horizon_backtest(forecast_series,mh_models,mh_horizon,mh_origins,mh_train)
             if mh_results.empty:
                 st.error("No valid multi-step forecast runs. Reduce minimum training months or horizon.")
             else:
@@ -496,16 +514,16 @@ with tabs[4]:
                 overall=mh_results.groupby("Model").agg(MAE=("Error",lambda x:float(np.mean(np.abs(x)))),RMSE=("Error",lambda x:float(np.sqrt(np.mean(np.square(x))))),Bias=("Error","mean"),Predictions=("Error","size")).reset_index().sort_values("RMSE")
                 st.session_state["export_multi_step_predictions"] = mh_results.copy()
                 st.session_state["export_multi_step_metrics"] = agg.copy()
-                st.session_state["multi_step_validation_snapshot"] = {"state":state,"sector":sector,"horizon":mh_horizon,"origins":mh_origins,"min_train":mh_train,"models":list(mh_models),"predictions":mh_results.copy(),"metrics":agg.copy(),"overall":overall.copy(),"failures":mh_fail.copy()}
+                st.session_state["multi_step_validation_snapshot"] = {"state":state,"sector":sector,"series":forecast_target,"horizon":mh_horizon,"origins":mh_origins,"min_train":mh_train,"models":list(mh_models),"predictions":mh_results.copy(),"metrics":agg.copy(),"overall":overall.copy(),"failures":mh_fail.copy()}
 
     saved_mh=st.session_state.get("multi_step_validation_snapshot")
-    if saved_mh and saved_mh.get("state")==state and saved_mh.get("sector")==sector:
+    if saved_mh and saved_mh.get("state")==state and saved_mh.get("sector")==sector and saved_mh.get("series", "YoY Inflation (%)")==forecast_target:
         mh_results_saved=saved_mh["predictions"]; agg_saved=saved_mh["metrics"]; overall_saved=saved_mh["overall"]; mh_fail_saved=saved_mh["failures"]
         st.caption(f"Saved multi-step validation · {saved_mh['horizon']} months · {saved_mh['origins']} origins · {len(saved_mh['models'])} models")
-        st.markdown("**Error by forecast horizon** (percentage points; N counts origin-target predictions)")
+        st.markdown(f"**Error by forecast horizon** ({series_unit}; N counts origin-target predictions)")
         st.dataframe(agg_saved.round(3),use_container_width=True,hide_index=True)
         fig=px.line(agg_saved,x="Horizon",y="RMSE",color="Model",markers=True,title="RMSE increases or changes with forecast horizon")
-        fig.update_layout(height=420,xaxis_title="Months ahead",yaxis_title="RMSE (percentage points)")
+        fig.update_layout(height=420,xaxis_title="Months ahead",yaxis_title=f"RMSE ({series_unit})")
         st.plotly_chart(fig,use_container_width=True)
         st.markdown("**Overall across all evaluated horizons**")
         st.dataframe(overall_saved.round(3),use_container_width=True,hide_index=True)
@@ -524,17 +542,15 @@ with tabs[4]:
     models=st.multiselect("Candidate methods",MODEL_NAMES,default=MODEL_NAMES,
                          help="All 12 individual methods are selected by default for the controlled multi-step comparison.")
     include_ensembles=st.checkbox("Evaluate pairwise and multi-model combinations",value=True)
-    y=(long[(long["State/UT"]==state)&(long.Sector==sector)].sort_values("Date").set_index("Date")["CPI"].asfreq("MS"))
-    yoy=(y/y.shift(12)-1)*100
-    recent=longest_contiguous(yoy)
-    st.caption(f"Observed YoY points: {int(yoy.notna().sum())} · Longest consecutive recent run: {len(recent)} months.")
+    recent=longest_contiguous(forecast_series)
+    st.caption(f"Observed {forecast_target} points: {int(forecast_series.notna().sum())} · Longest consecutive recent run: {len(recent)} months.")
     st.info("Model selection is based on recursive multi-step errors across the selected forecast horizon. A 12-month forecast is therefore compared using 12-month-ahead paths, not only one-month-ahead errors. All candidates are scored on the same complete forecast origins and horizons.")
     if st.button("Run Automatic Evaluation and Forecast",type="primary",use_container_width=True):
         if not models: st.warning("Choose at least one candidate model.")
-        elif len(recent)<min_train+horizon: st.error(f"This series needs at least {min_train+horizon} consecutive YoY observations for the selected training history and forecast horizon; it has {len(recent)}.")
+        elif len(recent)<min_train+horizon: st.error(f"This series needs at least {min_train+horizon} consecutive {forecast_target} observations for the selected training history and forecast horizon; it has {len(recent)}.")
         else:
             with st.spinner("Running recursive multi-step backtests for the selected methods..."):
-                mh_results,mh_fail=multi_horizon_backtest(yoy,models,horizon,origins,min_train)
+                mh_results,mh_fail=multi_horizon_backtest(forecast_series,models,horizon,origins,min_train)
             if mh_results.empty:
                 st.error("No candidate model produced a valid multi-step backtest. Reduce the horizon or minimum training history, or inspect the data continuity.")
             else:
@@ -563,13 +579,13 @@ with tabs[4]:
                         actual=model_frames[first_model]["Actual"]
                         score_rows=[]
                         aligned={m:frame["Predicted"] for m,frame in model_frames.items()}
-                        scale_train=yoy.loc[yoy.index<common_origins[0]].dropna()
+                        scale_train=forecast_series.loc[forecast_series.index<common_origins[0]].dropna()
                         scale_common=float(np.mean(np.abs(np.diff(scale_train.values)))) if len(scale_train)>1 else np.nan
                         for model_name,pred in aligned.items():
                             err=pred-actual; mae=float(np.mean(np.abs(err)))
                             score_rows.append({"Model":model_name,"Type":"Individual","Origins":len(common_origins),"Forecast errors":len(common_index),
-                                "MAE (pp)":mae,"RMSE (pp)":float(np.sqrt(np.mean(np.square(err)))),
-                                "MASE":mae/scale_common if scale_common and np.isfinite(scale_common) else np.nan,"Bias (pp)":float(err.mean())})
+                                "MAE":mae,"RMSE":float(np.sqrt(np.mean(np.square(err)))),
+                                "MASE":mae/scale_common if scale_common and np.isfinite(scale_common) else np.nan,"Bias":float(err.mean())})
 
                         ensemble_components={}
                         if include_ensembles and len(aligned)>=2:
@@ -577,16 +593,16 @@ with tabs[4]:
                                 name=f"Pairwise: {a} + {b}"; pred=(aligned[a]+aligned[b])/2.0
                                 ensemble_components[name]=[a,b]; err=pred-actual; mae=float(np.mean(np.abs(err)))
                                 score_rows.append({"Model":name,"Type":"Pairwise ensemble","Origins":len(common_origins),"Forecast errors":len(common_index),
-                                    "MAE (pp)":mae,"RMSE (pp)":float(np.sqrt(np.mean(np.square(err)))),
-                                    "MASE":mae/scale_common if scale_common and np.isfinite(scale_common) else np.nan,"Bias (pp)":float(err.mean())})
+                                    "MAE":mae,"RMSE":float(np.sqrt(np.mean(np.square(err)))),
+                                    "MASE":mae/scale_common if scale_common and np.isfinite(scale_common) else np.nan,"Bias":float(err.mean())})
                             names=list(aligned); name="Ensemble: equal-weight all models"
                             pred=pd.concat([aligned[m] for m in names],axis=1).mean(axis=1)
                             ensemble_components[name]=names; err=pred-actual; mae=float(np.mean(np.abs(err)))
                             score_rows.append({"Model":name,"Type":"Multi-model ensemble","Origins":len(common_origins),"Forecast errors":len(common_index),
-                                "MAE (pp)":mae,"RMSE (pp)":float(np.sqrt(np.mean(np.square(err)))),
-                                "MASE":mae/scale_common if scale_common and np.isfinite(scale_common) else np.nan,"Bias (pp)":float(err.mean())})
+                                "MAE":mae,"RMSE":float(np.sqrt(np.mean(np.square(err)))),
+                                "MASE":mae/scale_common if scale_common and np.isfinite(scale_common) else np.nan,"Bias":float(err.mean())})
 
-                        score=pd.DataFrame(score_rows).sort_values("RMSE (pp)").reset_index(drop=True)
+                        score=pd.DataFrame(score_rows).sort_values("RMSE").reset_index(drop=True)
                         winner=str(score.iloc[0].Model)
                         winner_components=ensemble_components.get(winner)
                         if winner_components is None:
@@ -595,7 +611,7 @@ with tabs[4]:
                             winner_pred=pd.concat([aligned[m] for m in winner_components],axis=1).mean(axis=1)
                         abs_err=np.abs(actual-winner_pred)
 
-                        train=longest_contiguous(yoy); fc=None
+                        train=longest_contiguous(forecast_series); fc=None
                         if len(train)>=min_train:
                             if winner_components is None:
                                 hist=train.copy(); preds=[]
@@ -620,7 +636,7 @@ with tabs[4]:
 
                         st.session_state["export_automatic_model_comparison"]=score.copy()
                         st.session_state["automatic_evaluation_snapshot"]={
-                            "state":state,"sector":sector,"horizon":horizon,"origins":len(common_origins),
+                            "state":state,"sector":sector,"series":forecast_target,"horizon":horizon,"origins":len(common_origins),
                             "score":score.copy(),"backtests":{m:bt.copy() for m,bt in model_frames.items()},
                             "winner":winner,"winner_components":winner_components,"forecast":fc.copy() if fc is not None else None,
                             "min_train":min_train,"validation_method":"recursive multi-step common-origin evaluation",
@@ -633,14 +649,14 @@ with tabs[4]:
 
     # Persist automatic evaluation output across Streamlit reruns (e.g. when another workflow is run).
     saved_auto = st.session_state.get("automatic_evaluation_snapshot")
-    if saved_auto and saved_auto.get("state")==state and saved_auto.get("sector")==sector:
+    if saved_auto and saved_auto.get("state")==state and saved_auto.get("sector")==sector and saved_auto.get("series", "YoY Inflation (%)")==forecast_target:
         score_saved=saved_auto["score"]
         backtests_saved=saved_auto["backtests"]
         winner_saved=saved_auto["winner"]
         st.caption(f"Saved automatic result · {saved_auto.get('validation_method','multi-step validation')} · {saved_auto.get('horizon')} months · {saved_auto.get('origins')} origins")
         st.markdown("#### Individual models and combinations")
-        st.dataframe(score_saved.style.format({"MAE (pp)":"{:.3f}","RMSE (pp)":"{:.3f}","MASE":"{:.3f}","Bias (pp)":"{:.3f}"}),use_container_width=True,hide_index=True)
-        st.success(f"Selected: {winner_saved} · lowest {saved_auto.get('horizon')}-month multi-step RMSE {score_saved.iloc[0]['RMSE (pp)']:.3f} percentage points.")
+        st.dataframe(score_saved.style.format({"MAE":"{:.3f}","RMSE":"{:.3f}","MASE":"{:.3f}","Bias":"{:.3f}"}),use_container_width=True,hide_index=True)
+        st.success(f"Selected: {winner_saved} · lowest {saved_auto.get('horizon')}-month multi-step RMSE {score_saved.iloc[0]['RMSE']:.3f} {series_unit}.")
         st.markdown("**How to interpret:** Lower MAE and RMSE mean smaller errors. MASE below 1 means the model beats the training-period naive scale. Positive bias means forecasts were too high on average; negative bias means they were too low. All candidates were compared on the same complete forecast origins and horizons.")
         winner_components=saved_auto.get("winner_components")
         if backtests_saved:
@@ -654,21 +670,21 @@ with tabs[4]:
                 validation_pred=np.mean(np.vstack(parts),axis=0)
             validation_dates=first_saved.loc[latest_origin,"Date"].tolist()
             fig=go.Figure()
-            fig.add_trace(go.Scatter(x=yoy.index,y=yoy.values,name="Historical YoY inflation"))
+            fig.add_trace(go.Scatter(x=forecast_series.index,y=forecast_series.values,name=f"Historical {forecast_target}"))
             fig.add_trace(go.Scatter(x=validation_dates,y=validation_pred,name=f"Validation path from {latest_origin:%b %Y}",mode="lines+markers"))
             st.plotly_chart(fig,use_container_width=True)
         forecast_saved=saved_auto.get("forecast")
         if isinstance(forecast_saved,pd.DataFrame) and not forecast_saved.empty:
             fig=go.Figure()
-            fig.add_trace(go.Scatter(x=yoy.index,y=yoy.values,name="Historical YoY inflation"))
+            fig.add_trace(go.Scatter(x=forecast_series.index,y=forecast_series.values,name=f"Historical {forecast_target}"))
             fig.add_trace(go.Scatter(x=forecast_saved.Date,y=forecast_saved.Forecast,name="Forecast",mode="lines+markers"))
             fig.add_trace(go.Scatter(x=forecast_saved.Date,y=forecast_saved["Upper empirical band"],line=dict(width=0),showlegend=False))
             fig.add_trace(go.Scatter(x=forecast_saved.Date,y=forecast_saved["Lower empirical band"],fill="tonexty",line=dict(width=0),name="Empirical 90th-percentile absolute-error envelope"))
-            fig.update_layout(height=420,title=f"{winner_saved} forecast · {state} · {sector}",xaxis_title="",yaxis_title="Inflation (%)")
+            fig.update_layout(height=420,title=f"{winner_saved} forecast · {forecast_target} · {state} · {sector}",xaxis_title="",yaxis_title=series_axis)
             st.plotly_chart(fig,use_container_width=True)
             st.dataframe(forecast_saved,use_container_width=True,hide_index=True)
-            st.download_button("Download forecast CSV",forecast_saved.to_csv(index=False).encode(),f"forecast_{state}_{sector}.csv","text/csv",key="persistent_auto_forecast_download")
-            st.info("The empirical envelope is based on absolute errors pooled across the selected multi-step validation horizons. It is descriptive, not a formally calibrated prediction interval; test coverage on a separate untouched holdout before making interval-coverage claims.")
+            st.download_button("Download forecast CSV",forecast_saved.to_csv(index=False).encode(),f"forecast_{forecast_target.split()[0]}_{state}_{sector}.csv","text/csv",key="persistent_auto_forecast_download")
+            st.info(f"The empirical envelope is based on absolute errors pooled across the selected multi-step validation horizons, in {series_unit}. It is descriptive, not a formally calibrated prediction interval; test coverage on a separate untouched holdout before making interval-coverage claims.")
         else:
             st.warning(f"Automatic model comparison is saved, but a future forecast could not be generated with the current minimum training requirement ({saved_auto.get('min_train')} months).")
 
@@ -679,11 +695,11 @@ with tabs[4]:
     manual_model=st.selectbox("Select a model to evaluate and forecast",MODEL_NAMES,key="manual_forecast_model")
     if st.button("Evaluate selected model and forecast",key="manual_eval_forecast",use_container_width=True):
         try:
-            manual_bt=rolling_eval(yoy,manual_model,origins=origins,min_train=min_train)
+            manual_bt=rolling_eval(forecast_series,manual_model,origins=origins,min_train=min_train)
             manual_mae=float(mean_absolute_error(manual_bt["Actual"],manual_bt["Predicted"]))
             manual_rmse=float(np.sqrt(mean_squared_error(manual_bt["Actual"],manual_bt["Predicted"])))
             manual_bias=float((manual_bt["Predicted"]-manual_bt["Actual"]).mean())
-            manual_history=longest_contiguous(yoy)
+            manual_history=longest_contiguous(forecast_series)
             manual_fc=None
             manual_error=None
             if len(manual_history)<min_train:
@@ -698,28 +714,28 @@ with tabs[4]:
                 manual_q90=float(np.quantile(manual_abs_err,0.90))
                 manual_fc=pd.DataFrame({"Date":manual_dates,"Forecast":manual_preds,"Lower empirical band":np.array(manual_preds)-manual_q90,"Upper empirical band":np.array(manual_preds)+manual_q90})
                 st.session_state["export_manual_forecast"]=manual_fc.copy()
-            st.session_state["manual_evaluation_snapshot"]={"model":manual_model,"state":state,"sector":sector,"horizon":horizon,"origins":len(manual_bt),"mae":manual_mae,"rmse":manual_rmse,"bias":manual_bias,"backtest":manual_bt.copy(),"forecast":manual_fc.copy() if manual_fc is not None else None,"error":manual_error,"min_train":min_train}
+            st.session_state["manual_evaluation_snapshot"]={"model":manual_model,"state":state,"sector":sector,"series":forecast_target,"horizon":horizon,"origins":len(manual_bt),"mae":manual_mae,"rmse":manual_rmse,"bias":manual_bias,"backtest":manual_bt.copy(),"forecast":manual_fc.copy() if manual_fc is not None else None,"error":manual_error,"min_train":min_train}
             st.session_state["manual_cpi_result"]={"model":manual_model,"state":state,"sector":sector,"horizon":horizon,"origins":len(manual_bt),"mae":manual_mae,"rmse":manual_rmse,"bias":manual_bias,"backtest":manual_bt.copy()}
         except Exception as e:
             st.error(f"Manual evaluation/forecast failed for {manual_model}: {e}")
 
     saved_manual=st.session_state.get("manual_evaluation_snapshot")
-    if saved_manual and saved_manual.get("state")==state and saved_manual.get("sector")==sector:
+    if saved_manual and saved_manual.get("state")==state and saved_manual.get("sector")==sector and saved_manual.get("series", "YoY Inflation (%)")==forecast_target:
         manual_bt_saved=saved_manual["backtest"]; manual_fc_saved=saved_manual.get("forecast")
         st.caption(f"Saved manual result · {saved_manual['model']} · {saved_manual['origins']} rolling origins")
-        st.success(f"Manual result: {saved_manual['model']} · {saved_manual['origins']} rolling origins · RMSE {saved_manual['rmse']:.3f} pp.")
+        st.success(f"Manual result: {saved_manual['model']} · {saved_manual['origins']} rolling origins · RMSE {saved_manual['rmse']:.3f} {series_unit}.")
         m1,m2,m3=st.columns(3)
-        m1.metric("MAE (pp)",f"{saved_manual['mae']:.3f}"); m2.metric("RMSE (pp)",f"{saved_manual['rmse']:.3f}"); m3.metric("Bias (pp)",f"{saved_manual['bias']:.3f}")
+        m1.metric(f"MAE ({series_unit})",f"{saved_manual['mae']:.3f}"); m2.metric(f"RMSE ({series_unit})",f"{saved_manual['rmse']:.3f}"); m3.metric(f"Bias ({series_unit})",f"{saved_manual['bias']:.3f}")
         backfig=go.Figure(); backfig.add_trace(go.Scatter(x=manual_bt_saved.index,y=manual_bt_saved["Actual"],name="Actual")); backfig.add_trace(go.Scatter(x=manual_bt_saved.index,y=manual_bt_saved["Predicted"],name="One-step predictions"))
-        backfig.update_layout(height=360,title=f"{saved_manual['model']} · rolling-origin evaluation",yaxis_title="YoY inflation (%)")
+        backfig.update_layout(height=360,title=f"{saved_manual['model']} · rolling-origin evaluation",yaxis_title=series_axis)
         st.plotly_chart(backfig,use_container_width=True)
         if isinstance(manual_fc_saved,pd.DataFrame) and not manual_fc_saved.empty:
-            fcfig=go.Figure(); fcfig.add_trace(go.Scatter(x=yoy.index,y=yoy.values,name="Historical YoY inflation")); fcfig.add_trace(go.Scatter(x=manual_fc_saved["Date"],y=manual_fc_saved["Forecast"],name=f"{saved_manual['model']} forecast")); fcfig.add_trace(go.Scatter(x=manual_fc_saved["Date"],y=manual_fc_saved["Upper empirical band"],line=dict(width=0),showlegend=False)); fcfig.add_trace(go.Scatter(x=manual_fc_saved["Date"],y=manual_fc_saved["Lower empirical band"],fill="tonexty",line=dict(width=0),name="Empirical 90th-percentile absolute-error envelope"))
-            fcfig.update_layout(height=390,title=f"Manual {saved_manual['model']} forecast · {state} · {sector}",yaxis_title="Inflation (%)")
+            fcfig=go.Figure(); fcfig.add_trace(go.Scatter(x=forecast_series.index,y=forecast_series.values,name=f"Historical {forecast_target}")); fcfig.add_trace(go.Scatter(x=manual_fc_saved["Date"],y=manual_fc_saved["Forecast"],name=f"{saved_manual['model']} forecast")); fcfig.add_trace(go.Scatter(x=manual_fc_saved["Date"],y=manual_fc_saved["Upper empirical band"],line=dict(width=0),showlegend=False)); fcfig.add_trace(go.Scatter(x=manual_fc_saved["Date"],y=manual_fc_saved["Lower empirical band"],fill="tonexty",line=dict(width=0),name="Empirical 90th-percentile absolute-error envelope"))
+            fcfig.update_layout(height=390,title=f"Manual {saved_manual['model']} forecast · {forecast_target} · {state} · {sector}",yaxis_title=series_axis)
             st.plotly_chart(fcfig,use_container_width=True)
             st.dataframe(manual_fc_saved,use_container_width=True,hide_index=True)
-            st.download_button("Download manual forecast CSV",manual_fc_saved.to_csv(index=False).encode(),f"manual_forecast_{state}_{sector}_{saved_manual['model'].replace(' ','_')}.csv","text/csv",key="download_manual_forecast")
-            st.info("Manual mode forecasts with the selected model regardless of its ranking. Empirical bands are descriptive historical-error bands, not calibrated prediction intervals.")
+            st.download_button("Download manual forecast CSV",manual_fc_saved.to_csv(index=False).encode(),f"manual_forecast_{forecast_target.split()[0]}_{state}_{sector}_{saved_manual['model'].replace(' ','_')}.csv","text/csv",key="download_manual_forecast")
+            st.info(f"Manual mode forecasts {forecast_target} with the selected model regardless of its ranking. Empirical bands are descriptive historical-error bands in {series_unit}, not calibrated prediction intervals.")
         elif saved_manual.get("error"):
             st.error(saved_manual["error"])
 
@@ -817,8 +833,8 @@ with tabs[5]:
 
     #### Evaluation metrics
 
-    - **MAE (Mean Absolute Error):** average absolute difference between forecast and actual inflation, measured in percentage points. Lower is better.
-    - **RMSE (Root Mean Squared Error):** square root of the average squared error. It penalises large forecast misses more heavily. Lower is better.
+    - **MAE (Mean Absolute Error):** average absolute difference between forecast and actual values, measured in the selected target’s units. Lower is better.
+    - **RMSE (Root Mean Squared Error):** square root of the average squared error in the selected target’s units. It penalises large forecast misses more heavily. Lower is better.
     - **MASE (Mean Absolute Scaled Error):** scales the model's MAE against a naïve benchmark. Values below 1 indicate lower error than the reference naïve scale, provided the same scaling definition is used.
     - **Bias:** average forecast minus actual value. Positive bias indicates over-forecasting; negative bias indicates under-forecasting.
 
@@ -845,7 +861,7 @@ with tabs[5]:
 
     #### Important interpretation notes
 
-    - Forecast errors are measured in inflation percentage points, not percentage changes in the error itself.
+    - Forecast errors are measured in the units of the selected target: CPI index points for CPI forecasts or percentage points for YoY forecasts.
     - A lower RMSE does not guarantee lower MAE or lower bias.
     - Results from one fixed holdout period should not be described as repeated-origin validation.
     - The dataset currently ends in May 2023; forecasts beyond this date cannot be verified against actual values using this dataset alone.
@@ -969,9 +985,9 @@ def build_complete_workbook():
     add_line_chart("EDA_Rolling_Statistics","Rolling mean YoY inflation",4,"A38","Inflation (%)")
     add_line_chart("EDA_Rolling_Statistics","Rolling volatility (12-month SD)",5,"J38","Standard deviation")
     if "Automatic_Forecast" in wb.sheetnames:
-        add_line_chart("Automatic_Forecast","Automatic forecast",2,"A54","Inflation (%)")
+        add_line_chart("Automatic_Forecast",f"Automatic {forecast_target} forecast",2,"A54",series_axis)
     if "Manual_Forecast" in wb.sheetnames:
-        add_line_chart("Manual_Forecast","Manual forecast",2,"J54","Inflation (%)")
+        add_line_chart("Manual_Forecast",f"Manual {forecast_target} forecast",2,"J54",series_axis)
     if "MultiStep_Metrics" in wb.sheetnames:
         ws = wb["MultiStep_Metrics"]
         # A compact horizon-metric table is included in the sheet; a chart can be built when its columns are present.
